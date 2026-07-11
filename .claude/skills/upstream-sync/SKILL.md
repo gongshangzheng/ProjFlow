@@ -55,6 +55,23 @@ git cherry-pick <SHA>                   # 精准搬一个共享改进
 
 > 慎用 `git merge upstream/main`：虽有共同祖先（159e4aa），但四库重叠文件已分叉，blanket merge 会大面积冲突。**cherry-pick 具体的 [shared] commit 更可控**。
 
+### 取上游的「部分文件」到下游（共享件，保留 git 血缘）
+
+当上游的一个 `[shared]` commit 里**只有一部分**是下游要的（例如 evaluation 模块：上游有通用后端 + 共享前端视图，下游只取前端视图、后端要自己定制），**不要用 `cp`**——会丢 git 血缘，下游看不出文件源自上游。用 `git checkout upstream/main -- <path>` 取：
+
+```bash
+git fetch upstream
+# 只取共享的前端视图/组件（带血缘 stage 进下游），后端 evaluation.py 下游自己写
+git checkout upstream/main -- web/src/views/evaluation/ web/src/components/common/VideoModal.vue web/src/api/evaluation.js
+# 下游定制的后端/配置：直接在下游写，不 checkout（会被上游通用版覆盖）
+#   server/routers/evaluation.py  -> 下游接领域数据源(codecs/序列/results.json)
+#   server/config.py 的 OUTPUTS_DIR -> 下游指 results/video/ 而非 evaluation/outputs/
+```
+
+**判别规则**：文件内容跨库**通用**（视图/组件/api 客户端/数据模板）→ `git checkout upstream/main -- <path>` 取；文件**绑定领域数据源**（router 读 results.json、列 codecs）→ 下游自己写。`cp` 只在「两库该文件已分叉、想手动合并」时用，且务必 commit message 注明源自上游哪个 commit。
+
+> 注意：`git checkout upstream/main -- <path>` 取回的文件会**覆盖**工作区同名文件（用上游版本替换），所以只对「下游该文件应等于上游」的路径用；对已定制分叉的路径别用，否则丢下游定制。
+
 ### 下游改了共享脚手架 → port 回上游
 
 ```bash
