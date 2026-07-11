@@ -15,7 +15,13 @@ const routes = [
       // 项目管理
       {
         path: 'management',
-        redirect: '/management/team',
+        redirect: '/management/projects',
+      },
+      {
+        path: 'management/projects',
+        name: 'Projects',
+        component: () => import('../views/management/Projects.vue'),
+        meta: { title: '项目树', module: 'management' },
       },
       {
         path: 'management/team',
@@ -134,6 +140,18 @@ const routes = [
         name: 'DatasetManage',
         component: () => import('../views/evaluation/DatasetManage.vue'),
         meta: { title: '数据集管理', module: 'evaluation' },
+      },
+      {
+        path: 'evaluation/outputs',
+        name: 'EvalOutputs',
+        component: () => import('../views/evaluation/EvalOutputs.vue'),
+        meta: { title: '查看输出', module: 'evaluation' },
+      },
+      {
+        path: 'evaluation/configs',
+        name: 'ConfigManage',
+        component: () => import('../views/evaluation/ConfigManage.vue'),
+        meta: { title: '评测配置', module: 'evaluation' },
       },
     ],
   },

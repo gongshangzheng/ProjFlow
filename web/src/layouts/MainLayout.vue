@@ -40,6 +40,14 @@
         </div>
         <div class="header-right">
           <span class="header-date">{{ today }}</span>
+          <n-button quaternary circle class="theme-toggle" @click="themeStore.toggle">
+            <template #icon>
+              <n-icon size="18">
+                <sunny-outline v-if="themeStore.isDark" />
+                <moon-outline v-else />
+              </n-icon>
+            </template>
+          </n-button>
         </div>
       </n-layout-header>
 
@@ -56,18 +64,20 @@ import { ref, computed, h, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   NLayout, NLayoutSider, NLayoutHeader, NLayoutContent,
-  NMenu, NBreadcrumb, NBreadcrumbItem,
+  NMenu, NBreadcrumb, NBreadcrumbItem, NButton, NIcon,
 } from 'naive-ui'
 import {
   HomeOutline, PeopleOutline, CalendarOutline, GridOutline,
   FlagOutline, ChatbubblesOutline, DocumentTextOutline,
   SearchOutline, SettingsOutline, FlaskOutline, BarChartOutline,
-  CubeOutline, LayersOutline,
+  CubeOutline, LayersOutline, GitBranchOutline, FilmOutline,
+  SunnyOutline, MoonOutline,
 } from '@vicons/ionicons5'
-import { NIcon } from 'naive-ui'
+import { useThemeStore } from '../stores/theme'
 
 const route = useRoute()
 const router = useRouter()
+const themeStore = useThemeStore()
 const collapsed = ref(false)
 const manualExpanded = ref(null)
 
@@ -99,6 +109,7 @@ const menuOptions = [
     key: 'management',
     icon: renderIcon(PeopleOutline),
     children: [
+      { label: '项目树', key: '/management/projects', icon: renderIcon(GitBranchOutline) },
       { label: '团队成员', key: '/management/team', icon: renderIcon(PeopleOutline) },
       { label: '日报', key: '/management/daily', icon: renderIcon(CalendarOutline) },
       { label: '周报', key: '/management/weekly', icon: renderIcon(DocumentTextOutline) },
@@ -124,8 +135,10 @@ const menuOptions = [
     children: [
       { label: '评测运行', key: '/evaluation/run', icon: renderIcon(FlaskOutline) },
       { label: '评测结果', key: '/evaluation/results', icon: renderIcon(BarChartOutline) },
+      { label: '查看输出', key: '/evaluation/outputs', icon: renderIcon(FilmOutline) },
       { label: '模型管理', key: '/evaluation/models', icon: renderIcon(CubeOutline) },
       { label: '数据集管理', key: '/evaluation/datasets', icon: renderIcon(LayersOutline) },
+      { label: '评测配置', key: '/evaluation/configs', icon: renderIcon(SettingsOutline) },
     ],
   },
 ]
@@ -134,10 +147,10 @@ const activeKey = computed(() => {
   const path = route.path
   // 匹配最长前缀
   const allKeys = [
-    '/', '/management/team', '/management/daily', '/management/weekly',
+    '/', '/management/projects', '/management/team', '/management/daily', '/management/weekly',
     '/management/monthly', '/management/tasks', '/management/milestones',
     '/management/meetings', '/papers/list', '/papers/config',
-    '/evaluation/run', '/evaluation/results', '/evaluation/models', '/evaluation/datasets',
+    '/evaluation/run', '/evaluation/results', '/evaluation/outputs', '/evaluation/models', '/evaluation/datasets', '/evaluation/configs',
   ]
   let best = '/'
   for (const k of allKeys) {
@@ -200,12 +213,23 @@ const today = computed(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: #fff;
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .header-date {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-dim);
+}
+
+.theme-toggle {
+  color: var(--color-text-secondary);
 }
 
 .app-content {
