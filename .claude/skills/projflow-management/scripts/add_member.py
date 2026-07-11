@@ -1,132 +1,126 @@
 #!/usr/bin/env python3
-"""添加团队成员脚本"""
+"""Add a team member to management/team/.
 
+Two steps:
+1. Append a row to the 成员列表 table in management/team/README.md
+   (and drop the "暂无" placeholder row when the first real member is added).
+2. Create the profile management/team/{id}.md from a template.
+
+Self-locating; argparse; identical file used in infraredComp and ProjFlow.
+
+Usage:
+    python3 add_member.py --name 张三 --id zhangsan --role 算法工程师 \\
+        --join-date 2026-01-15 --research "红外视频压缩" \\
+        --tech "Python,PyTorch,ffmpeg" --modules "评测,论文"
+"""
+from __future__ import annotations
+
+import argparse
 import os
 import sys
-import re
-from datetime import datetime
+from pathlib import Path
 
-TEAM_DIR = "management/team"
-README_FILE = "management/team/README.md"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-def ensure_dir(path):
-    os.makedirs(path, exist_ok=True)
+import mgmt_io
 
-def update_team_readme(name, english_id, role, join_date):
-    """更新团队成员列表"""
-    ensure_dir(TEAM_DIR)
+MEMBER_SECTION = "成员列表"
 
-    if not os.path.exists(README_FILE):
-        # 创建默认 README
-        content = """# 团队成员
-
-本目录存放团队所有成员的档案文件。
-
-## 成员列表
-
-| 姓名 | 英文标识 | 角色 | 入职日期 |
-|------|----------|------|----------|
-"""
-        with open(README_FILE, 'w') as f:
-            f.write(content)
-
-    # 读取现有内容
-    with open(README_FILE, 'r') as f:
-        content = f.read()
-
-    # 检查是否已存在
-    if english_id in content:
-        print(f"成员 {name} ({english_id}) 已存在")
-        return False
-
-    # 添加新成员到表格
-    new_row = f"| {name} | {english_id} | {role} | {join_date} |\n"
-
-    # 找到表格最后一行（暂无或最后成员行）并替换
-    if "暂无" in content:
-        content = content.replace("暂无", f"{name} | {english_id} | {role} | {join_date}")
-    else:
-        # 找到表格结束位置插入
-        lines = content.split('\n')
-        for i, line in enumerate(lines):
-            if '|' in line and '---' not in line and '姓名' not in line:
-                # 找到成员列表最后一行后插入
-                pass
-        content = content.rstrip('\n') + '\n' + new_row
-
-    with open(README_FILE, 'w') as f:
-        f.write(content)
-
-    return True
-
-def create_member_profile(name, english_id, role, join_date, research_area, tech_stack, modules, notes=""):
-    """创建成员档案"""
-    ensure_dir(TEAM_DIR)
-
-    filename = os.path.join(TEAM_DIR, f"{english_id}.md")
-    if os.path.exists(filename):
-        print(f"档案 {filename} 已存在")
-        return False
-
-    content = f"""# {name}
+PROFILE_TEMPLATE = """# {name}
 
 ## 基本信息
 
 | 字段 | 内容 |
 |------|------|
 | 姓名 | {name} |
-| 英文标识 | {english_id} |
+| 英文标识 | {id} |
 | 角色 | {role} |
 | 入职日期 | {join_date} |
-| 研究方向 | {research_area} |
+| 研究方向 | {research} |
 
 ## 技术栈
 
+{tech_list}
+
+## 负责模块
+
+{module_list}
+
+## 备注
+
+{note}
 """
-    for tech in tech_stack:
-        content += f"- {tech}\n"
 
-    content += "\n## 负责模块\n\n"
-    for module in modules:
-        content += f"- {module}\n"
 
-    if notes:
-        content += f"\n## 备注\n\n{notes}\n"
+def ensure_readme(readme: Path) -> None:
+    if readme.exists():
+        return
+    content = (
+        "# 团队成员\n\n"
+        "本目录存放团队所有成员的档案文件。\n\n"
+        "## 成员列表\n\n"
+        "| 姓名 | 英文标识 | 角色 | 入职日期 |\n"
+        "|------|----------|------|----------|\n"
+        "| 暂无 | — | — | — |\n\n"
+        "## 新增成员\n\n"
+        "新成员入职时，请复制模板创建新的档案文件，命名格式为 `姓名.md`。\n"
+    )
+    mgmt_io.write_text(readme, content)
 
-    with open(filename, 'w') as f:
-        f.write(content)
 
-    return True
+def add_to_readme(args) -> None:
+    readme = mgmt_io.team_readme()
+    ensure_readme(readme)
+    lines = mgmt_io.read_lines(readme)
+    existing = mgmt_io.list_rows(lines, MEMBER_SECTION)
+    if any(r.get("英文标识") == args.id for r in existing):
+        sys.exit(f"error: member {args.id!r} already exists in {mgmt_io.rel(readme)}")
+    # drop the 暂无 placeholder when adding a real member
+    if any(r.get("姓名") == "暂无" for r in existing):
+        lines = mgmt_io.delete_row_by_col(lines, MEMBER_SECTION, "姓名", "暂无")
+    values = {
+        "姓名": args.name,
+        "英文标识": args.id,
+        "角色": args.role,
+        "入职日期": args.join_date,
+    }
+    lines = mgmt_io.add_row(lines, MEMBER_SECTION, values)
+    mgmt_io.write_lines(readme, lines)
+    print(f"✓ added member {args.name!r} ({args.id}) to list  ({mgmt_io.rel(readme)})")
 
-def main():
-    if len(sys.argv) < 3:
-        print("用法:")
-        print("  添加成员: python3 add_member.py <姓名> <英文ID> <角色> <入职日期> [研究方向]")
-        print("示例:")
-        print("  python3 add_member.py 张三 zhangsan 算法工程师 2026-01-15 LLM")
-        sys.exit(1)
 
-    name = sys.argv[1]
-    english_id = sys.argv[2]
-    role = sys.argv[3]
-    join_date = sys.argv[4]
-    research_area = sys.argv[5] if len(sys.argv) > 5 else ""
+def create_profile(args) -> None:
+    profile = mgmt_io.team_dir() / f"{args.id}.md"
+    if profile.exists():
+        print(f"! profile {mgmt_io.rel(profile)} already exists, skipped", file=sys.stderr)
+        return
+    tech_list = "\n".join(f"- {t.strip()}" for t in args.tech.split(",") if t.strip()) or "- "
+    module_list = "\n".join(f"- {m.strip()}" for m in args.modules.split(",") if m.strip()) or "- 待分配"
+    text = PROFILE_TEMPLATE.format(
+        name=args.name, id=args.id, role=args.role, join_date=args.join_date,
+        research=args.research, tech_list=tech_list, module_list=module_list,
+        note=args.note or "无",
+    )
+    mgmt_io.write_text(profile, text)
+    print(f"✓ created profile {mgmt_io.rel(profile)}")
 
-    # 更新列表
-    if update_team_readme(name, english_id, role, join_date):
-        print(f"✓ 已更新团队列表")
 
-    # 创建档案
-    if create_member_profile(
-        name, english_id, role, join_date,
-        research_area,
-        ["Python", "PyTorch"],  # 默认技术栈
-        ["待分配"],              # 默认模块
-        ""
-    ):
-        print(f"✓ 已创建成员档案: {english_id}.md")
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--name", required=True)
+    ap.add_argument("--id", required=True, help="english identifier (profile filename stem)")
+    ap.add_argument("--role", required=True)
+    ap.add_argument("--join-date", required=True, help="YYYY-MM-DD")
+    ap.add_argument("--research", default="", help="研究方向")
+    ap.add_argument("--tech", default="", help="comma-separated tech stack")
+    ap.add_argument("--modules", default="", help="comma-separated responsible modules")
+    ap.add_argument("--note", default="", help="备注")
+    args = ap.parse_args()
 
-    print(f"\n成员 {name} 添加完成！")
+    add_to_readme(args)
+    create_profile(args)
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

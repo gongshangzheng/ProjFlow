@@ -1,159 +1,74 @@
 #!/usr/bin/env python3
-"""创建报表脚本 - 支持日报、周报、月报"""
+"""Create a report file (daily / weekly / monthly).
 
+Self-locating; argparse; identical file used in infraredComp and ProjFlow.
+
+    daily:   management/daily/{YYYY}/{MM}/{DD}-{author}.md     (--date YYYY-MM-DD)
+    weekly:  management/weekly/{YYYY}/W{NN}-{author}.md         (--year --week)
+    monthly: management/monthly/{YYYY}/{MM}-{author}.md         (--year --month)
+
+Usage:
+    python3 create_report.py --type daily --author zhangsan --date 2026-07-11
+    python3 create_report.py --type weekly --author zhangsan --year 2026 --week 28
+    python3 create_report.py --type monthly --author zhangsan --year 2026 --month 07
+"""
+from __future__ import annotations
+
+import argparse
 import os
 import sys
-from datetime import datetime
 
-REPORT_TYPES = {
-    'daily': '日报',
-    'weekly': '周报',
-    'monthly': '月报'
-}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-def create_daily(author, date=None):
-    """创建日报"""
-    if date is None:
-        date = datetime.now().strftime('%Y/%m/%d')
-    else:
-        # 转换日期格式
-        dt = datetime.strptime(date, '%Y-%m-%d')
-        date = dt.strftime('%Y/%m/%d')
+import mgmt_io
 
-    year, month, day = date.split('/')
-    filename = f"management/daily/{year}/{month}/{day}-{author}.md"
+TYPE_TITLE = {"daily": "日报", "weekly": "周报", "monthly": "月报"}
+WORK_HEADER = {"daily": "今日工作", "weekly": "本周工作", "monthly": "本月工作"}
+PLAN_HEADER = {"daily": "明日计划", "weekly": "下周计划", "monthly": "下月计划"}
 
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-    if os.path.exists(filename):
-        print(f"文件已存在: {filename}")
-        return False
+def title_line(rtype: str, author: str, *, date, year, week, month) -> str:
+    if rtype == "daily":
+        y, m, d = date.split("-")
+        return f"# {TYPE_TITLE[rtype]} — {author} — {y}-{m}-{d}"
+    if rtype == "weekly":
+        w = (week or "").lstrip("Ww")
+        return f"# {TYPE_TITLE[rtype]} — {author} — {year} 第 {int(w)} 周"
+    return f"# {TYPE_TITLE[rtype]} — {author} — {year}-{month}"
 
-    content = f"""# {REPORT_TYPES['daily']} — {author} — {date.replace('/', '-')}
 
-## 今日工作
+def build_body(rtype: str) -> str:
+    return (
+        f"\n## {WORK_HEADER[rtype]}\n\n-\n"
+        f"\n## {PLAN_HEADER[rtype]}\n\n-\n"
+        f"\n## 备注\n\n无\n"
+    )
 
--
 
-## 明日计划
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--type", required=True, choices=["daily", "weekly", "monthly"])
+    ap.add_argument("--author", required=True)
+    ap.add_argument("--date", default=None, help="YYYY-MM-DD (daily)")
+    ap.add_argument("--year", default=None)
+    ap.add_argument("--week", default=None, help="week number (weekly)")
+    ap.add_argument("--month", default=None, help="MM (monthly)")
+    args = ap.parse_args()
 
--
+    path = mgmt_io.report_path(
+        args.type, args.author,
+        date=args.date, year=args.year, week=args.week, month=args.month,
+    )
+    if path.exists():
+        sys.exit(f"error: {mgmt_io.rel(path)} already exists (use update_report.py to edit)")
 
-## 备注
+    title = title_line(args.type, args.author,
+                       date=args.date, year=args.year, week=args.week, month=args.month)
+    text = title + "\n" + build_body(args.type)
+    mgmt_io.write_text(path, text)
+    print(f"✓ created {args.type} report {mgmt_io.rel(path)}")
+    return 0
 
-无
-"""
-
-    with open(filename, 'w') as f:
-        f.write(content)
-
-    print(f"✓ 已创建日报: {filename}")
-    return True
-
-def create_weekly(author, year=None, week=None):
-    """创建周报"""
-    if year is None:
-        year = datetime.now().strftime('%Y')
-    if week is None:
-        # 计算当前周数
-        now = datetime.now()
-        week = now.isocalendar()[1]
-
-    filename = f"management/weekly/{year}/W{week:02d}-{author}.md"
-
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-    if os.path.exists(filename):
-        print(f"文件已存在: {filename}")
-        return False
-
-    content = f"""# {REPORT_TYPES['weekly']} — {author} — {year} 第 {week} 周
-
-## 本周工作
-
--
-
-## 下周计划
-
--
-
-## 备注
-
-无
-"""
-
-    with open(filename, 'w') as f:
-        f.write(content)
-
-    print(f"✓ 已创建周报: {filename}")
-    return True
-
-def create_monthly(author, year=None, month=None):
-    """创建月报"""
-    if year is None:
-        year = datetime.now().strftime('%Y')
-    if month is None:
-        month = datetime.now().strftime('%m')
-
-    filename = f"management/monthly/{year}/{month}-{author}.md"
-
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-    if os.path.exists(filename):
-        print(f"文件已存在: {filename}")
-        return False
-
-    content = f"""# {REPORT_TYPES['monthly']} — {author} — {year} 年 {month} 月
-
-## 本月工作
-
--
-
-## 下月计划
-
--
-
-## 备注
-
-无
-"""
-
-    with open(filename, 'w') as f:
-        f.write(content)
-
-    print(f"✓ 已创建月报: {filename}")
-    return True
-
-def main():
-    if len(sys.argv) < 3:
-        print("用法:")
-        print("  python3 create_report.py daily <作者> [日期 YYYY-MM-DD]")
-        print("  python3 create_report.py weekly <作者> [年份 YYYY] [周数 W]")
-        print("  python3 create_report.py monthly <作者> [年份 YYYY] [月份 MM]")
-        print("示例:")
-        print("  python3 create_report.py daily zhangsan")
-        print("  python3 create_report.py daily zhangsan 2026-07-10")
-        print("  python3 create_report.py weekly zhangsan")
-        print("  python3 create_report.py monthly zhangsan")
-        sys.exit(1)
-
-    report_type = sys.argv[1].lower()
-    author = sys.argv[2]
-
-    if report_type == 'daily':
-        date = sys.argv[3] if len(sys.argv) > 3 else None
-        create_daily(author, date)
-    elif report_type == 'weekly':
-        year = sys.argv[3] if len(sys.argv) > 3 else None
-        week = sys.argv[4] if len(sys.argv) > 4 else None
-        create_weekly(author, year, week)
-    elif report_type == 'monthly':
-        year = sys.argv[3] if len(sys.argv) > 3 else None
-        month = sys.argv[4] if len(sys.argv) > 4 else None
-        create_monthly(author, year, month)
-    else:
-        print(f"未知报表类型: {report_type}")
-        sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -1,311 +1,172 @@
 ---
 name: projflow-management
 description: |
-  ProjFlow 项目管理模块操作指南。用于项目树、团队成员管理、日报/周报/月报、任务看板、里程碑、会议纪要等 CRUD 操作。
-  触发场景：(1) 添加/编辑团队成员，(2) 创建/查看报表，(3) 管理任务看板，(4) 创建会议纪要，(5) 了解项目结构
+  ProjFlow 项目管理模块操作指南。用于团队成员管理、日报/周报/月报、任务看板、里程碑、会议纪要等 CRUD 操作（脚本直接改 markdown，后端只读）。
+  触发场景：(1) 添加/修改/删除团队成员，(2) 创建/更新/删除报表，(3) 管理任务看板(增删改查+跨段移动)，(4) 创建/更新/删除会议纪要，(5) 了解项目结构
 ---
 
 # ProjFlow 项目管理模块
 
-本 skill 提供 ProjFlow 项目管理模块的完整操作指南。
+本 skill 提供 ProjFlow 项目管理模块（`management/`）的完整操作指南，以及一套**自定位**的 CRUD 脚本，直接读写 `management/` 下的 markdown 文件。
+
+> **架构前提**：后端 `server/routers/management.py` 是**只读**的（解析 markdown 暴露给前端）。所有"增删改"由本 skill 的脚本直接修改 markdown 完成，再由只读 API 暴露。infraredComp 镜像本库。
+
+## 脚本一览（`.claude/skills/projflow-management/scripts/`）
+
+脚本 **self-locating**（用 `parents[4]` 解析仓库根），同一份文件在 ProjFlow 与 infraredComp 都能跑（两库 `tasks.md` schema 一致）。纯标准库，`python3` 直接运行。
+
+| 实体 | 新增 | 修改 | 删除 | 查询 |
+|------|------|------|------|------|
+| 任务 task | `add_task.py` | `update_task.py`（含跨段 move） | `delete_task.py` | `list_tasks.py` |
+| 成员 member | `add_member.py` | `update_member.py` | `delete_member.py` | — |
+| 会议 meeting | `create_meeting.py` | `update_meeting.py` | `delete_meeting.py` | — |
+| 报表 report | `create_report.py` | `update_report.py` | `delete_report.py` | — |
 
 ## 项目结构
 
-```
+```text
 management/
-├── team/           # 团队成员档案
-│   ├── README.md   # 成员列表表格
-│   └── {姓名}.md   # 个人详情
-├── daily/          # 日报 YYYY/MM/DD-姓名.md
-├── weekly/         # 周报 YYYY/WXX-姓名.md
-├── monthly/        # 月报 YYYY/MM-姓名.md
+├── team/           # 团队成员
+│   ├── README.md   # 成员列表表(姓名|英文标识|角色|入职日期) + 暂无占位
+│   └── {id}.md     # 个人档案(基本信息表 + 技术栈 + 负责模块 + 备注)
+├── daily/          # 日报  YYYY/MM/DD-{author}.md
+├── weekly/         # 周报  YYYY/W{NN}-{author}.md
+├── monthly/        # 月报  YYYY/{MM}-{author}.md
 └── docs/
-    ├── tasks.md    # 任务看板
+    ├── tasks.md    # 任务看板(三段: 进行中/待开始/已完成)
     ├── milestones.md # 里程碑
     ├── projects/   # 项目树 {slug}/README.md + tasks.json + notes/
     └── meetings/   # 会议纪要 YYYY-MM-DD.md
 ```
 
-## 启动服务
+启动服务（后端 8090 + 前端 3002）：`bash start_services.sh`。日志 `/tmp/projflow-backend.log`、`/tmp/projflow-frontend.log`。
 
-```bash
-# 后端 (8090)
-python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8090
-
-# 前端 (3002)
-cd web && npx vite --port 3002
-```
-
-访问 http://localhost:3002
+只读 API（`GET /api/management/*`）：`team`、`daily`、`weekly`、`monthly`、`tasks`、`milestones`、`meetings`、`projects` 等。脚本改完 markdown，前端经 API 即可看到。
 
 ---
 
-## 1. 团队成员管理
+## 1. 任务看板 CRUD
 
-### 查看成员列表
+`management/docs/tasks.md` 三段，**每段列不同**（后端 `tasks_parser` 按表顺序映射 in_progress/pending/completed）：
 
-```bash
-# API
-GET /api/management/team
-
-# 直接读取
-cat management/team/README.md
-```
-
-### 添加新成员
-
-需要两步：
-
-1. **更新成员列表** - 编辑 `management/team/README.md`，在表格中添加新成员：
-
-```markdown
-| 姓名 | 英文标识 | 角色 | 入职日期 |
-|------|----------|------|----------|
-| 张三 | zhangsan | 算法工程师 | 2026-01-15 |
-```
-
-2. **创建个人档案** - 创建 `management/team/{姓名}.md`：
-
-```markdown
-# 张三
-
-## 基本信息
-
-| 字段 | 内容 |
-|------|------|
-| 姓名 | 张三 |
-| 英文标识 | zhangsan |
-| 角色 | 算法工程师 |
-| 入职日期 | 2026-01-15 |
-| 研究方向 | 大语言模型 |
-
-## 技术栈
-
-- Python
-- PyTorch
-- Transformers
-
-## 负责模块
-
-- 论文搜集
-- 模型评测
-
-## 备注
-
-专注 LLM 研究
-```
-
-### 查看成员详情
-
-```bash
-# API
-GET /api/management/team/{member_id}
-
-# 直接读取
-cat management/team/{姓名}.md
-```
-
----
-
-## 2. 报表管理
-
-### 日报
-
-**文件命名**: `daily/YYYY/MM/DD-姓名.md`
-
-```bash
-# 查看列表
-GET /api/management/daily
-
-# 查看详情
-GET /api/management/daily/{date}/{author}
-
-# 示例文件: management/daily/2026/07/10-zhangsan.md
-```
-
-**模板**:
-```markdown
-# 日报 — 张三 — 2026-07-10
-
-## 今日工作
-
-- 完成 XX 功能开发
-- 调研 XX 技术方案
-
-## 明日计划
-
-- 继续 XX 开发
-- 参加 XX 会议
-
-## 备注
-
-无
-```
-
-### 周报
-
-**文件命名**: `weekly/YYYY/WXX-姓名.md`
-
-```bash
-GET /api/management/weekly
-GET /api/management/weekly/{year}/{week}/{author}
-
-# 示例: management/weekly/2026/W28-zhangsan.md
-```
-
-**模板**:
-```markdown
-# 周报 — 张三 — 2026 第 28 周
-
-## 本周工作
-
-- 完成 XX 模块开发
-- 优化了 XX 性能
-
-## 下周计划
-
-- 开展 XX 项目
-- 准备 XX 汇报
-
-## 备注
-
-无
-```
-
-### 月报
-
-**文件命名**: `monthly/YYYY/MM-姓名.md`
-
-```bash
-GET /api/management/monthly
-GET /api/management/monthly/{year}/{month}/{author}
-
-# 示例: management/monthly/2026/07-zhangsan.md
-```
-
----
-
-## 3. 任务看板
-
-**文件**: `management/docs/tasks.md`
-
-```bash
-GET /api/management/tasks
-```
-
-**表格结构**:
 ```markdown
 ## 进行中
-
-| 任务 | 负责人 | 优先级 | 截止日期 |
-|------|--------|--------|----------|
-| XX 开发 | 张三 | P1 | 2026-07-15 |
+| 任务 | 负责人 | 开始日期 | 截止日期 | 状态 | 备注 |
 
 ## 待开始
-
-| 任务 | 负责人 | 优先级 | 截止日期 |
-|------|--------|--------|----------|
+| 任务 | 负责人 | 预计开始 | 截止日期 | 优先级 | 备注 |
 
 ## 已完成
-
-| 任务 | 负责人 | 完成日期 |
-|------|--------|----------|
+| 任务 | 负责人 | 完成日期 | 产出 | 备注 |
 ```
-
----
-
-## 4. 里程碑
-
-**文件**: `management/docs/milestones.md`
 
 ```bash
-GET /api/management/milestones
+SD=.claude/skills/projflow-management/scripts
+
+# 新增任务（进行中）
+python3 $SD/add_task.py --section 进行中 --name "模块X开发" \
+  --owner 张三 --start 2026-07-11 --end 2026-07-18 --status 🟢 --note "备注"
+# 新增任务（待开始，带优先级）
+python3 $SD/add_task.py --section 待开始 --name "Y调研" --owner 李四 --priority P1
+
+# 修改字段（只改传了的）
+python3 $SD/update_task.py --section 进行中 --name "模块X开发" --status 🔴 --owner 李四
+# 改名
+python3 $SD/update_task.py --section 进行中 --name "模块X开发" --new-name "模块X v2"
+# 完成（跨段 move 进行中 -> 已完成，完成日期默认今天，产出可指定）
+python3 $SD/update_task.py --section 进行中 --name "模块X开发" --move-to 已完成 --output "PR#12"
+
+# 删除
+python3 $SD/delete_task.py --section 进行中 --name "模块X开发"
+
+# 查询
+python3 $SD/list_tasks.py                 # 全部
+python3 $SD/list_tasks.py --section 待开始
 ```
 
-**表格结构**:
-```markdown
-## 里程碑
-
-| 名称 | 目标日期 | 状态 | 备注 |
-|------|----------|------|------|
-| v1.0 发布 | 2026-08-01 | 进行中 | |
-```
+`--section` 接受中文（进行中/待开始/已完成）或英文别名（in_progress/pending/completed、ongoing/todo/done）。状态 emoji：🟢 正常 / 🟡 风险 / 🔴 阻塞 / ✅ 完成。
 
 ---
 
-## 5. 会议纪要
-
-**目录**: `management/docs/meetings/`
-**文件命名**: `YYYY-MM-DD.md`
+## 2. 团队成员 CRUD
 
 ```bash
-GET /api/management/meetings
-GET /api/management/meetings/{date}
-```
+# 新增（自动去掉 README 的"暂无"占位行，并生成 {id}.md 档案）
+python3 $SD/add_member.py --name 张三 --id zhangsan --role 算法工程师 \
+  --join-date 2026-01-15 --research "大语言模型" --tech "Python,PyTorch,Transformers" --modules "论文,评测"
 
-**模板**:
-```markdown
-# 会议纪要 — 2026-07-10
+# 修改（按 --id 定位；--new-id 会改 id 并重命名档案文件）
+python3 $SD/update_member.py --id zhangsan --role "高级算法工程师" --join-date 2026-01-15
+python3 $SD/update_member.py --id zhangsan --name 张三丰 --new-id zhangsanfeng
 
-## 基本信息
-
-- 参会人：张三、李四
-- 记录人：张三
-- 时间：2026-07-10 14:00-15:00
-
-## 议题
-
-1. 项目进度回顾
-2. 技术方案讨论
-
-## 讨论内容
-
-### 议题 1
-...
-
-### 议题 2
-...
-
-## 决议
-
-- 确认 XX 方案
-- 继续推进 XX
-
-## 待办
-
-- [ ] 张三：完成 XX
-- [ ] 李四：调研 XX
+# 删除（同时删 README 行 + 档案文件；--keep-profile 保留档案）
+python3 $SD/delete_member.py --id zhangsan
+python3 $SD/delete_member.py --id zhangsan --keep-profile
 ```
 
 ---
 
-## 6. 项目树
+## 3. 报表 CRUD
 
-**目录**: `management/docs/projects/{slug}/`
+文件路径：daily `YYYY/MM/DD-{author}.md`、weekly `YYYY/W{NN}-{author}.md`、monthly `YYYY/{MM}-{author}.md`。
 
 ```bash
-GET /api/management/projects
-GET /api/management/projects/{slug}
-GET /api/management/projects/{slug}/tasks
-GET /api/management/projects/{slug}/notes/{note_path}
+# 创建
+python3 $SD/create_report.py --type daily   --author zhangsan --date 2026-07-11
+python3 $SD/create_report.py --type weekly  --author zhangsan --year 2026 --week 28
+python3 $SD/create_report.py --type monthly --author zhangsan --year 2026 --month 07
+
+# 更新（追加工作/计划条目，或重写备注）
+python3 $SD/update_report.py --type daily --author zhangsan --date 2026-07-11 \
+  --append-work "完成 X 模块" --append-plan "优化 Y" --note "ok"
+
+# 删除
+python3 $SD/delete_report.py --type daily   --author zhangsan --date 2026-07-11
+python3 $SD/delete_report.py --type weekly  --author zhangsan --year 2026 --week 28
+python3 $SD/delete_report.py --type monthly --author zhangsan --year 2026 --month 07
 ```
 
-每个项目目录包含：
-- `README.md`：项目说明（含 YAML frontmatter）
-- `tasks.json`：任务树
-- `notes/`：任务笔记 markdown
+---
+
+## 4. 会议纪要 CRUD
+
+文件：`management/docs/meetings/YYYY-MM-DD.md`。
+
+```bash
+# 创建
+python3 $SD/create_meeting.py --date 2026-07-11 \
+  --participants "张三、李四" --recorder 张三 --topics "进度回顾,方案讨论" \
+  --decision "确认 X 方案" --todo "张三:完成 X"
+
+# 更新（换参会人/记录人，追加决议/待办）
+python3 $SD/update_meeting.py --date 2026-07-11 --participants "张三、李四、王五" \
+  --append-decision "追加决议" --append-todo "李四:调研 Y"
+
+# 删除
+python3 $SD/delete_meeting.py --date 2026-07-11
+```
 
 ---
+
+## 5. 里程碑 / 项目树
+
+`milestones.md` 单表（名称|目标日期|状态|备注）；项目树 `docs/projects/{slug}/`（README.md + tasks.json + notes/）。这两块暂无专用 CRUD 脚本，直接编辑 markdown 即可，只读 API `GET /api/management/milestones`、`GET /api/management/projects[/{slug}[/tasks|/notes/{path}]]` 会自动解析。
+
+## 关键约定
+
+- **只读后端**：management 后端只读 markdown；所有写操作走本 skill 脚本（直接改文件 + 原子写）。
+- **parser 兼容**：脚本的表格编辑器**保留表头**、按段实际列数生成行，与 `server/parsers/tasks_parser.py`（按表顺序 + 按表头名取列）兼容。
+- **空表保留**：`markdown_table.parse_markdown_tables` 已修——空表（header+separator 无数据行）也保留，保证 `tasks_parser` 的位置映射（in_progress/pending/completed）不因某段为空而错位。
+- **跨段 move**：`update_task --move-to` 自动按目标段列重映射（任务/负责人带过去；→已完成 完成日期默认今天、产出可来自 `--output` 或原备注）。
+- **自定位**：脚本用 `parents[4]` 解析仓库根，从任意 cwd 运行均可；同一份文件在 ProjFlow 与 infraredComp 通用。
 
 ## 常用命令
 
 ```bash
-# 启动服务
-bash start_services.sh
-
-# 查看后端日志
-tail -f /tmp/projflow-backend.log
-
-# 查看前端日志
-tail -f /tmp/projflow-frontend.log
+SD=.claude/skills/projflow-management/scripts
+python3 $SD/list_tasks.py                      # 看任务看板
+python3 $SD/add_task.py --section 进行中 --name "X" --owner Y --start 2026-07-11 --end 2026-07-18
+bash start_services.sh                         # 启动后端 8090 + 前端 3002
+curl --noproxy '*' http://localhost:8090/api/management/tasks   # 前端所见
+tail -f /tmp/projflow-backend.log              # 后端日志
 ```
