@@ -70,7 +70,7 @@ import {
   HomeOutline, PeopleOutline, CalendarOutline, GridOutline,
   FlagOutline, ChatbubblesOutline, DocumentTextOutline,
   SearchOutline, SettingsOutline, FlaskOutline, BarChartOutline,
-  CubeOutline, LayersOutline, GitBranchOutline, FilmOutline,
+  CubeOutline, LayersOutline, GitBranchOutline, FilmOutline, SchoolOutline,
   SunnyOutline, MoonOutline,
 } from '@vicons/ionicons5'
 import { useThemeStore } from '../stores/theme'
@@ -141,6 +141,18 @@ const menuOptions = [
       { label: '评测配置', key: '/evaluation/configs', icon: renderIcon(SettingsOutline) },
     ],
   },
+  {
+    label: '训练体系',
+    key: 'training',
+    icon: renderIcon(SchoolOutline),
+    children: [
+      { label: '训练运行', key: '/training/run', icon: renderIcon(SchoolOutline) },
+      { label: '训练结果', key: '/training/results', icon: renderIcon(BarChartOutline) },
+      { label: '模型配置', key: '/training/models', icon: renderIcon(CubeOutline) },
+      { label: '数据集配置', key: '/training/datasets', icon: renderIcon(LayersOutline) },
+      { label: '训练配置', key: '/training/configs', icon: renderIcon(SettingsOutline) },
+    ],
+  },
 ]
 
 const activeKey = computed(() => {
@@ -151,6 +163,7 @@ const activeKey = computed(() => {
     '/management/monthly', '/management/tasks', '/management/milestones',
     '/management/meetings', '/papers/list', '/papers/config',
     '/evaluation/run', '/evaluation/results', '/evaluation/outputs', '/evaluation/models', '/evaluation/datasets', '/evaluation/configs',
+    '/training/run', '/training/results', '/training/models', '/training/datasets', '/training/configs',
   ]
   let best = '/'
   for (const k of allKeys) {
@@ -171,6 +184,7 @@ const breadcrumbs = computed(() => {
     management: '项目管理',
     papers: '论文搜集',
     evaluation: '评测体系',
+    training: '训练体系',
   }
   if (route.meta.module && moduleMap[route.meta.module]) {
     items.push({ title: moduleMap[route.meta.module], path: '' })
