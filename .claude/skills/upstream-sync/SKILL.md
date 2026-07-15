@@ -29,7 +29,7 @@ infraredComp  pet-action  DigitalTeacher   (downstream, 下游)
 
 | 范围 | 归属 | 典型路径 |
 |------|------|----------|
-| 共享全栈脚手架 | **ProjFlow（上游）** | `server/main.py`(app+CORS+router 挂载)、`server/config.py`(路径常量模式)、`server/utils/file_utils.py`、`server/parsers/markdown_table.py`(含空表修复)、parser 模式、`web/` 脚手架(vite.config/api/request.js/layouts/MainLayout.vue/router/index.js/styles/)、`start_services.sh`、`AGENTS.md` 结构、management/papers/evaluation **模块结构**、`.github/workflows` |
+| 共享全栈脚手架 | **ProjFlow（上游）** | `server/main.py`(app+CORS+router 挂载)、`server/config.py`(路径常量模式)、`server/utils/file_utils.py`、`server/parsers/markdown_table.py`(含空表修复)、`server/parsers/tasks_parser.py`(看板=项目树同源派生)、parser 模式、`web/` 脚手架(vite.config/api/request.js/layouts/MainLayout.vue/router/index.js/styles/)、`start_services.sh`、`AGENTS.md` 结构、management/papers/evaluation **模块结构**、`.github/workflows` |
 | 共享 skills | **ProjFlow（上游）** | 跨项目复用的 skill（management CRUD、web 开发指南、本 upstream-sync 等）；下游镜像成自己前缀版本时从上游取改进 |
 | 红外压缩领域 | **infraredComp（下游）** | `benchmark/video/` 轮廓视频压缩评测、`datasets/`、`results/`、`server/routers/benchmark.py`、`web/src/views/benchmark/`、contour-video-* skills |
 | 宠物动作识别领域 | **pet-action-recognition（下游）** | `evaluation/`、宠物专属 router/views、pet-action-recognition-* skills |
@@ -102,6 +102,11 @@ git format-patch -1 HEAD --stdout > /tmp/shared.patch   # 在下游
 - ❌ 把领域代码/数据推到 ProjFlow（上游只放共享脚手架 + 共享 skill）。
 - ❌ 在下游改共享脚手架后不 port 回上游（会导致兄弟库拿不到、长期分叉）。
 - ❌ `git merge upstream/main` 不带审查（重叠文件冲突，易吞掉下游定制）。
+
+## 经验沉淀（架构决策，供后人参考）
+
+- **任务数据单源（2026-07-15）**：任务看板与项目树曾用两份冗余文件——`management/docs/tasks.md`（全局看板，3 段 markdown 表）+ `management/docs/projects/{slug}/tasks.json`（项目树，层级 JSON），schema 各异、手动双写易分叉。已合并为**单源 = per-project `tasks.json`**：看板（`server/parsers/tasks_parser.parse_tasks(slug)`）递归展平树 + 按 status 映射成 3 桶（completed→completed / active→in_progress / planned·paused·blocked→pending）；`tasks.md` 删除。改一处、看板与项目树同步。脚手架改动按铁律先在 ProjFlow 落地 `[shared]` commit，再同构同步到 infraredComp。管理 skill 脚本（`add/update/delete/list_task.py`）改操作 `tasks.json`（`--slug --id`），成员/报表/会议/里程碑仍是 markdown（`mgmt_io` markdown helpers 保留）。
+- **训练界面上游/下游边界**：ProjFlow 训练 UI 是上游契约（`/run` 是 stub，models/datasets 空，待下游覆盖）。infraredComp 的训练 UX（localStorage F5 持久化、config preset 回填、3s 实时轮询曲线、auto-select-latest、withSelected 下拉稳定）已回移植到 ProjFlow 作为通用范本，**丢弃红外特异设计**（method canny/sobel/hed、isVideo 条件字段、imagenet 提示、λ/quality 率失真字段）。下游 infraredComp **保留** λ/quality/method 等领域字段（RD 训练脚本 `scripts/train_model.py` 需要 `--quality`/`--lambda`）。判断标准： ProjFlow 表单只放通用超参（epochs/lr/batch/optimizer/device/extra_args），领域超参由下游加。
 
 ## 备份与历史
 
