@@ -23,9 +23,9 @@ from server.utils.file_utils import read_file, safe_resolve
 router = APIRouter(prefix="/api/training", tags=["training"])
 
 # 上游默认空数据（下游覆盖）。脚手架仅示范契约 shape。
-DEFAULT_MODELS = []      # [{id, name, 架构, quality 级, pretrained 来源, trained_checkpoint?}]
+DEFAULT_MODELS = []      # [{id, name, 架构, pretrained 来源, trained_checkpoint?}]
 DEFAULT_DATASETS = []    # [{id, name, split, num_samples, modalities, description}]
-DEFAULT_CONFIGS = [      # 超参 preset 示范
+DEFAULT_CONFIGS = [      # 通用超参 preset 示范；下游按模型/数据集增领域超参
     {
         "id": "default",
         "name": "默认训练配置",
@@ -34,9 +34,7 @@ DEFAULT_CONFIGS = [      # 超参 preset 示范
         "batch_size": 16,
         "optimizer": "adam",
         "scheduler": "cosine",
-        "lambda": 0.01,  # rate-distortion 权衡
-        "quality": 3,
-        "description": "示范超参 preset；下游按模型/数据集调",
+        "description": "通用超参 preset；下游按模型/数据集增领域超参（如率失真 λ、quality 级等）",
     },
 ]
 
@@ -91,7 +89,7 @@ async def get_dataset_detail(dataset_id: str):
 
 @router.get("/configs")
 async def get_configs():
-    """训练超参 preset（epochs/lr/batch/optimizer/scheduler/lambda/quality）。"""
+    """训练超参 preset（epochs/lr/batch/optimizer/scheduler；下游可增领域超参）。"""
     return DEFAULT_CONFIGS
 
 
