@@ -121,7 +121,7 @@ import { NButton, NInput, NCard, NTable } from 'naive-ui'
 | 日报 | `management/daily/YYYY/MM/` |
 | 周报 | `management/weekly/YYYY/` |
 | 月报 | `management/monthly/YYYY/` |
-| 任务 | `management/docs/tasks.md` |
+| 任务 | `management/docs/projects/{slug}/tasks.json`（看板+项目树单源） |
 | 里程碑 | `management/docs/milestones.md` |
 | 会议 | `management/docs/meetings/` |
 | 论文 | `data/papers.db` |
