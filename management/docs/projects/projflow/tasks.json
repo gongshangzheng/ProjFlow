@@ -68,7 +68,25 @@
           "priority": "high",
           "assignee": "张三",
           "description": "解析 projects/{slug}/ 数据，渲染分支线任务树与悬浮卡",
-          "children": []
+          "children": [],
+          "progress": [
+            {
+              "date": "2026-07-16",
+              "note": "[完成] Cornell 笔记布局上线——描述居中、进展时间线右侧、完成总结底部。hover-card 也加了 progress 预览（最近 3 条）"
+            },
+            {
+              "date": "2026-07-16",
+              "note": "hidden 字段前后端联调通过，眼睛图标切换流畅"
+            },
+            {
+              "date": "2026-07-16",
+              "note": "项目树默认折叠改为 depth=0 全折叠，用户体验更干净"
+            },
+            {
+              "date": "2026-07-16",
+              "note": "hover-card 英文溢出修复完成，white-space: pre-line 生效"
+            }
+          ]
         }
       ]
     },
