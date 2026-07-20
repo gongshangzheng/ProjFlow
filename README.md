@@ -51,27 +51,27 @@ ProjFlow/
 ## 快速开始
 
 ```bash
-# 一键启动（后端 8090 + 前端 3002）
+# 一键启动（后端 8809 + 前端 3210）
 bash start_services.sh
 
 # 或手动启动：
 # 1. 后端
 cd ProjFlow
-python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8090
+python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8809
 
 # 2. 前端
 cd ProjFlow/web
-npx vite --port 3002
+npx vite --port 3210
 ```
 
-启动后访问 http://localhost:3002
+启动后访问 http://localhost:3210
 
 ## 技术栈
 
 | 层 | 技术 | 端口 |
 |----|------|------|
-| 前端 | Vue 3 + Vite + Naive UI + Vue Router | 3002 |
-| 后端 | FastAPI (Python) | 8090 |
+| 前端 | Vue 3 + Vite + Naive UI + Vue Router | 3210 |
+| 后端 | FastAPI (Python) | 8809 |
 | 数据源 | Markdown 文件 + SQLite | — |
 
 ## License

@@ -41,7 +41,7 @@ def tasks_md() -> Path:
 
 
 def milestones_md() -> Path:
-    return MGMT_DIR / "docs" / "milestones.md"
+    return MGMT_DIR / "milestones.md"
 
 
 def team_readme() -> Path:

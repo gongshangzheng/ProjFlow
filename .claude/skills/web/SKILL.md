@@ -42,30 +42,30 @@ cd <仓库根>
 bash start_services.sh
 ```
 
-脚本会检测端口冲突：如果 8090 或 3002 已被其他进程占用，会报告占用进程的 PID 和命令行，然后退出（不自动 kill）。用户需要手动 stop 冲突进程后重试。
+脚本会检测端口冲突：如果 8809 或 3210 已被其他进程占用，会报告占用进程的 PID 和命令行，然后退出（不自动 kill）。用户需要手动 stop 冲突进程后重试。
 
 ### 手动启动
 
-**后端 (8090)**
+**后端 (8809)**
 ```bash
 cd <仓库根>
 # 检查端口是否被占用
-lsof -i :8090 -sTCP:LISTEN
+lsof -i :8809 -sTCP:LISTEN
 # 如果被占用，手动杀掉占用进程（用 lsof 输出的 PID）
 kill <PID>
 # 启动
-python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8090
+python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8809
 ```
 
-**前端 (3002)**
+**前端 (3210)**
 ```bash
 cd <仓库根>/web
-lsof -i :3002 -sTCP:LISTEN
+lsof -i :3210 -sTCP:LISTEN
 kill <PID>
-npx vite --port 3002 --strict-port
+npx vite --port 3210 --strict-port
 ```
 
-访问 http://localhost:3002
+访问 http://localhost:3210
 
 ## 后端开发
 
@@ -91,7 +91,7 @@ npx vite --port 3002 --strict-port
 tail -f /tmp/backend.log
 
 # 测试 API
-curl http://localhost:8090/api/management/team
+curl http://localhost:8809/api/management/team
 ```
 
 ## 前端开发
@@ -143,12 +143,12 @@ import { NButton, NInput, NCard, NTable } from 'naive-ui'
 ```bash
 # 重启后端
 pkill -f "uvicorn server.main"
-python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8090
+python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8809
 
 # 重启前端
 cd web && npm run dev
 
 # 查看端口
-lsof -i :8090  # 后端
-lsof -i :3002  # 前端
+lsof -i :8809  # 后端
+lsof -i :3210  # 前端
 ```

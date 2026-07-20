@@ -10,13 +10,13 @@ ProjFlow 是一个通用的项目管理 demo 平台，包含三大模块：**项
 
 | 层 | 技术 | 端口 |
 |----|------|------|
-| 前端 | Vue 3 + Vite + Naive UI + Vue Router | 3002 |
-| 后端 | FastAPI (Python) | 8090 |
+| 前端 | Vue 3 + Vite + Naive UI + Vue Router | 3210 |
+| 后端 | FastAPI (Python) | 8809 |
 
 ### 服务架构
 
 ```
-浏览器 → Vite (3002) → FastAPI (8090) → management/ 目录（Markdown 文件）
+浏览器 → Vite (3210) → FastAPI (8809) → management/ 目录（Markdown 文件）
                                       → data/papers.db（SQLite 论文数据库）
                                       → evaluation/ 目录（模型/数据集/结果 JSON）
 ```
@@ -28,17 +28,17 @@ ProjFlow 是一个通用的项目管理 demo 平台，包含三大模块：**项
 ## 启动服务
 
 ```bash
-# 一键启动（后端 8090 + 前端 3002）
+# 一键启动（后端 8809 + 前端 3210）
 bash start_services.sh
 
 # 或手动启动：
 # 1. 后端
 cd ProjFlow
-nohup python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8090 </dev/null > /tmp/backend.log 2>&1 & disown
+nohup python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8809 </dev/null > /tmp/backend.log 2>&1 & disown
 
 # 2. 前端
 cd ProjFlow/web
-nohup npx vite --port 3002 --strict-port </dev/null > /tmp/frontend.log 2>&1 & disown
+nohup npx vite --port 3210 --strict-port </dev/null > /tmp/frontend.log 2>&1 & disown
 ```
 
 ## 目录结构
@@ -66,7 +66,7 @@ ProjFlow/
 │   │   └── file_utils.py   # 文件操作工具
 │   └── requirements.txt
 ├── web/                     # Vue 3 前端
-│   ├── vite.config.js       # Vite 配置（端口 3002，代理 /api → 8090）
+│   ├── vite.config.js       # Vite 配置（端口 3210，代理 /api → 8809）
 │   ├── src/
 │   │   ├── api/             # API 请求封装（management.js, papers.js, evaluation.js）
 │   │   ├── layouts/         # 布局组件
@@ -109,8 +109,8 @@ ProjFlow/
 **数据流**：
 ```
 management/ 目录（Markdown 文件）
-  ↓ FastAPI (port 8090, server/routers/management.py → server/parsers/)
-前端 Vue 组件 (port 3002)
+  ↓ FastAPI (port 8809, server/routers/management.py → server/parsers/)
+前端 Vue 组件 (port 3210)
 ```
 
 **关键设计**：
@@ -125,8 +125,8 @@ management/ 目录（Markdown 文件）
 **数据流**：
 ```
 data/papers.db（SQLite 数据库）
-  ↓ FastAPI (port 8090, server/routers/papers.py → server/db.py)
-前端 Vue 组件 (port 3002)
+  ↓ FastAPI (port 8809, server/routers/papers.py → server/db.py)
+前端 Vue 组件 (port 3210)
 ```
 
 **关键设计**：
@@ -139,8 +139,8 @@ data/papers.db（SQLite 数据库）
 **数据流**：
 ```
 evaluation/ 目录（JSON 文件）
-  ↓ FastAPI (port 8090, server/routers/evaluation.py)
-前端 Vue 组件 (port 3002)
+  ↓ FastAPI (port 8809, server/routers/evaluation.py)
+前端 Vue 组件 (port 3210)
 ```
 
 **关键设计**：
@@ -204,10 +204,10 @@ lsof -i :<port>
 macOS 上 nohup 进程需要 `</dev/null` 重定向 stdin，否则终端关闭时进程收到 SIGHUP 挂起。
 
 ### Vite 端口被占用
-使用 `--strict-port` 避免自动 fallback 到其他端口。如果 3002 被占，先 `lsof -i :3002` 找到并杀掉旧进程。
+使用 `--strict-port` 避免自动 fallback 到其他端口。如果 3210 被占，先 `lsof -i :3210` 找到并杀掉旧进程。
 
 ### 管理页面数据为空
-检查后端（port 8090）是否在运行，`management/` 目录下是否有对应的数据文件。
+检查后端（port 8809）是否在运行，`management/` 目录下是否有对应的数据文件。
 
 ### 论文页面数据为空
 论文数据库 `data/papers.db` 需通过 `scripts/import_papers.py` 导入数据后才有内容。

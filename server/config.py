@@ -26,6 +26,6 @@ PAPERS_DB = os.path.join(BASE_DIR, "data", "papers.db")
 
 # CORS 配置
 CORS_ORIGINS = [
-    "http://localhost:3002",
-    "http://127.0.0.1:3002",
+    "http://localhost:3210",
+    "http://127.0.0.1:3210",
 ]
