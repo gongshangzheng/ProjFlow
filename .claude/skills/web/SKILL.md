@@ -42,17 +42,17 @@ cd <仓库根>
 bash start_services.sh
 ```
 
-脚本会自动检测端口占用：如果 8090 或 3002 已被其他进程占用，会先 kill 占用进程再启动本项目的服务。
+脚本会检测端口冲突：如果 8090 或 3002 已被其他进程占用，会报告占用进程的 PID 和命令行，然后退出（不自动 kill）。用户需要手动 stop 冲突进程后重试。
 
 ### 手动启动
 
 **后端 (8090)**
 ```bash
 cd <仓库根>
-# 先检查端口是否被占用
+# 检查端口是否被占用
 lsof -i :8090 -sTCP:LISTEN
-# 如果被占用，杀掉占用进程
-kill $(lsof -ti :8090 -sTCP:LISTEN)
+# 如果被占用，手动杀掉占用进程（用 lsof 输出的 PID）
+kill <PID>
 # 启动
 python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8090
 ```
@@ -61,7 +61,7 @@ python3 -m uvicorn server.main:app --host 0.0.0.0 --port 8090
 ```bash
 cd <仓库根>/web
 lsof -i :3002 -sTCP:LISTEN
-kill $(lsof -ti :3002 -sTCP:LISTEN)
+kill <PID>
 npx vite --port 3002 --strict-port
 ```
 
