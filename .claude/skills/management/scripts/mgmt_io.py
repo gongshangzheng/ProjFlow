@@ -36,12 +36,19 @@ TODAY = date.today().isoformat()
 # --------------------------------------------------------------------------- #
 # Path helpers                                                                #
 # --------------------------------------------------------------------------- #
-def tasks_md() -> Path:
-    return MGMT_DIR / "docs" / "tasks.md"
-
-
 def milestones_md() -> Path:
     return MGMT_DIR / "milestones.md"
+
+
+def docs_dir() -> Path:
+    """Wiki-style documentation directory: management/docs/*.md"""
+    return MGMT_DIR / "docs"
+
+
+def doc_path(slug: str) -> Path:
+    """Resolve a wiki doc path by slug (filename without .md)."""
+    _validate_slug(slug)
+    return docs_dir() / f"{slug}.md"
 
 
 def team_readme() -> Path:
@@ -53,7 +60,7 @@ def team_dir() -> Path:
 
 
 def meetings_dir() -> Path:
-    return MGMT_DIR / "docs" / "meetings"
+    return MGMT_DIR / "meetings"
 
 
 def meeting_path(iso_date: str) -> Path:
@@ -181,7 +188,7 @@ def section_header_index(lines: list[str], section: str) -> int:
     for i, line in enumerate(lines):
         if line.strip() == target:
             return i
-    sys.exit(f"error: section {section!r} not found in {rel(tasks_md())}")
+    sys.exit(f"error: section {section!r} not found in file")
 
 
 def table_block_range(lines: list[str], header_idx: int) -> tuple[int, int]:
@@ -244,7 +251,7 @@ def find_row_by_col(
         idx = cols.index(col)
         if cells[idx] == value:
             return i, dict(zip(cols, cells))
-    sys.exit(f"error: {value!r} not found in column {col!r} of {section!r} ({rel(tasks_md())})")
+    sys.exit(f"error: {value!r} not found in column {col!r} of {section!r}")
 
 
 def list_rows(lines: list[str], section: str) -> list[dict[str, str]]:
@@ -418,7 +425,7 @@ def append_to_section(lines: list[str], header: str, bullets: list[str]) -> list
 import json
 import re as _re
 
-_PROJECTS_DIR = MGMT_DIR / "docs" / "projects"
+_PROJECTS_DIR = MGMT_DIR / "projects"
 _SLUG_RE = _re.compile(r"^[A-Za-z0-9_-]+$")
 
 # canonical task statuses + 看板桶映射
