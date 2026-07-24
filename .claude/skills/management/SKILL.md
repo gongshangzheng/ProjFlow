@@ -275,6 +275,8 @@ python3 $SD/delete_meeting.py --date 2026-07-11
 
 项目树 `projects/{slug}/`：`README.md`（项目元信息 + 正文）+ **`tasks.json`（任务单源，CRUD 见 §1）** + `notes/`（任务笔记 markdown，task 节点 `notePath` 引用）。只读 API `GET /api/management/projects[/{slug}[/tasks|/notes/{path}]]` 解析。项目树页与看板页读同一份 `tasks.json`。
 
+> **⚠️ 目录区分**：`management/docs/` = Wiki 文档（独立知识库，DocPage 页面展示）；`management/projects/{slug}/notes/` = 任务笔记（仅附在特定任务上，通过 `notePath` 引用）。**创建通用文档必须放 `management/docs/`，禁止放入 `notes/`。**
+
 ## 6. 文档（Wiki）CRUD → `DocPage.vue`
 
 文件：`management/docs/`（纯 wiki 目录，递归扫描所有 `.md` 文件，支持子目录）。前端通过 `DocPage.vue` 展示（列表+详情同一组件），支持 `[[slug]]` 和 `[[slug|显示文本]]` 文档链接、`[[proj#task]]` 任务链接（MarkdownRenderer 自动转换）。
