@@ -30,7 +30,8 @@
           "description": "MainLayout 侧边栏 + 面包屑，按模块组织路由与菜单",
           "children": []
         }
-      ]
+      ],
+      "summaryPath": "summary/t1.md"
     },
     {
       "id": "t2",
