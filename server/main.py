@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from server.config import CORS_ORIGINS
-from server.routers import management, papers, evaluation, training
+from server.routers import management, papers, evaluation, training, datasets, speedrun
 
 app = FastAPI(
     title="ProjFlow 项目管理平台 API",
@@ -29,6 +29,8 @@ app.include_router(management.router)
 app.include_router(papers.router)
 app.include_router(evaluation.router)
 app.include_router(training.router)
+app.include_router(datasets.router)
+app.include_router(speedrun.router)
 
 
 @app.get("/")

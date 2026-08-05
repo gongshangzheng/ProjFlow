@@ -77,7 +77,7 @@ import {
   FlagOutline, ChatbubblesOutline, DocumentTextOutline, BookOutline,
   SearchOutline, SettingsOutline, FlaskOutline, BarChartOutline,
   CubeOutline, LayersOutline, GitBranchOutline, FilmOutline, SchoolOutline,
-  SunnyOutline, MoonOutline,
+  FlashOutline, SunnyOutline, MoonOutline,
 } from '@vicons/ionicons5'
 import { useThemeStore } from '../stores/theme'
 
@@ -92,6 +92,7 @@ const expandedKeys = computed(() => {
   const path = route.path
   if (path.startsWith('/management')) return ['management']
   if (path.startsWith('/papers')) return ['papers']
+  if (path.startsWith('/training')) return ['training']
   if (path.startsWith('/evaluation')) return ['evaluation']
   return []
 })
@@ -134,17 +135,9 @@ const menuOptions = [
     ],
   },
   {
-    label: '评测体系',
-    key: 'evaluation',
-    icon: renderIcon(FlaskOutline),
-    children: [
-      { label: '评测运行', key: '/evaluation/run', icon: renderIcon(FlaskOutline) },
-      { label: '评测结果', key: '/evaluation/results', icon: renderIcon(BarChartOutline) },
-      { label: '查看输出', key: '/evaluation/outputs', icon: renderIcon(FilmOutline) },
-      { label: '模型管理', key: '/evaluation/models', icon: renderIcon(CubeOutline) },
-      { label: '数据集管理', key: '/evaluation/datasets', icon: renderIcon(LayersOutline) },
-      { label: '评测配置', key: '/evaluation/configs', icon: renderIcon(SettingsOutline) },
-    ],
+    label: '数据集',
+    key: '/datasets',
+    icon: renderIcon(LayersOutline),
   },
   {
     label: '训练体系',
@@ -158,6 +151,20 @@ const menuOptions = [
       { label: '训练配置', key: '/training/configs', icon: renderIcon(SettingsOutline) },
     ],
   },
+  {
+    label: '评测体系',
+    key: 'evaluation',
+    icon: renderIcon(FlaskOutline),
+    children: [
+      { label: '评测运行', key: '/evaluation/run', icon: renderIcon(FlaskOutline) },
+      { label: 'Speed Run', key: '/evaluation/speedrun', icon: renderIcon(FlashOutline) },
+      { label: '评测结果', key: '/evaluation/results', icon: renderIcon(BarChartOutline) },
+      { label: '查看输出', key: '/evaluation/outputs', icon: renderIcon(FilmOutline) },
+      { label: '模型管理', key: '/evaluation/models', icon: renderIcon(CubeOutline) },
+      { label: '数据集管理', key: '/evaluation/datasets', icon: renderIcon(LayersOutline) },
+      { label: '评测配置', key: '/evaluation/configs', icon: renderIcon(SettingsOutline) },
+    ],
+  },
 ]
 
 const activeKey = computed(() => {
@@ -169,7 +176,8 @@ const activeKey = computed(() => {
     '/', '/management/projects', '/management/team',
     '/management/tasks', '/management/milestones',
     '/management/meetings', '/management/docs', '/papers/list', '/papers/config',
-    '/evaluation/run', '/evaluation/results', '/evaluation/outputs', '/evaluation/models', '/evaluation/datasets', '/evaluation/configs',
+    '/datasets',
+    '/evaluation/run', '/evaluation/speedrun', '/evaluation/results', '/evaluation/outputs', '/evaluation/models', '/evaluation/datasets', '/evaluation/configs',
     '/training/run', '/training/results', '/training/models', '/training/datasets', '/training/configs',
   ]
   let best = '/'
@@ -193,6 +201,7 @@ function onBreadcrumbClick(item) {
 const MODULE_PATH = {
   management: '/management/projects',
   papers: '/papers/list',
+  datasets: '/datasets',
   evaluation: '/evaluation/run',
   training: '/training/run',
 }
@@ -202,6 +211,7 @@ const breadcrumbs = computed(() => {
   const moduleMap = {
     management: '项目管理',
     papers: '论文搜集',
+    datasets: '数据集',
     evaluation: '评测体系',
     training: '训练体系',
   }

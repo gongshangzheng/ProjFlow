@@ -17,6 +17,9 @@ papers/cache/
 # Evaluation results
 evaluation/results/
 
+# Dataset thumbnails cache (generated)
+datasets/.thumbs/
+
 # Temp logs
 /tmp/*.log
 

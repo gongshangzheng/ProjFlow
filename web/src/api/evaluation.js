@@ -24,3 +24,9 @@ export const compareResults = (params) => request.get('/evaluation/results/compa
 export const listOutputs = () => request.get('/evaluation/outputs')
 // 拼接按需播放 URL（<video preload="none"> 仅在挂载时才请求字节）
 export const getOutputUrl = (path) => `/api/evaluation/outputs/${path}`
+
+// Speed Run（N 视频 × M 模型跑批画廊）
+export const getSpeedrunResults = () => request.get('/speedrun/results')
+export const getSpeedrunStatus = () => request.get('/speedrun/status')
+export const runSpeedrun = (data) => request.post('/speedrun/run', data)
+export const getSpeedrunOutputUrl = (path) => `/api/speedrun/outputs/${path}`

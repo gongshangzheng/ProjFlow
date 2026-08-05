@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-07-29 10:00:00",
+  "results": [
+    {
+      "id": "demo_model_a__clip_001",
+      "model_id": "demo_model_a",
+      "video": "clip_001.mp4",
+      "gt_label": "walking",
+      "correct": true,
+      "metrics": { "top1_label": "walking", "top1_score": 0.92 },
+      "output_video": "demo_model_a/clip_001.mp4",
+      "cover_image": "covers/clip_001.png",
+      "status": "completed",
+      "elapsed_s": 3.2,
+      "gpu_mem_mb": 1843,
+      "gpu_avg_util": 62,
+      "rtf": 0.41,
+      "finished_at": "2026-07-29 09:58:01"
+    },
+    {
+      "id": "demo_model_a__clip_002",
+      "model_id": "demo_model_a",
+      "video": "clip_002.mp4",
+      "gt_label": "running",
+      "correct": false,
+      "metrics": { "top1_label": "jumping", "top1_score": 0.55 },
+      "output_video": "demo_model_a/clip_002.mp4",
+      "cover_image": "covers/clip_002.png",
+      "status": "completed",
+      "elapsed_s": 2.8,
+      "gpu_mem_mb": 1843,
+      "gpu_avg_util": 58,
+      "rtf": 0.37,
+      "finished_at": "2026-07-29 09:58:05"
+    },
+    {
+      "id": "demo_model_b__clip_001",
+      "model_id": "demo_model_b",
+      "video": "clip_001.mp4",
+      "gt_label": "walking",
+      "correct": null,
+      "metrics": { "top1_label": "walking", "top1_score": 0.87 },
+      "output_video": "demo_model_b/clip_001.mp4",
+      "cover_image": "covers/clip_001.png",
+      "status": "completed",
+      "elapsed_s": 5.1,
+      "gpu_mem_mb": 3202,
+      "gpu_avg_util": 74,
+      "rtf": 0.66,
+      "finished_at": "2026-07-29 09:59:12"
+    }
+  ]
+}
