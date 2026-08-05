@@ -97,7 +97,7 @@
             </span>
           </div>
 
-          <div class="cornell-body">
+          <div class="cornell-body" :style="{ '--progress-w': progressWidth + 'px' }">
             <div class="cornell-main">
               <div class="desc-panel">
                 <div v-if="noteLoading" class="empty-inline">加载笔记中…</div>
@@ -122,7 +122,8 @@
               </div>
             </div>
 
-            <aside class="cornell-right" :class="{ collapsed: progressCollapsed }">
+            <aside class="cornell-right" :class="{ collapsed: progressCollapsed, resizing }">
+              <div v-if="!progressCollapsed" class="progress-resizer" @mousedown.prevent="startResize"></div>
               <template v-if="!progressCollapsed">
                 <div class="progress-head">
                   <span>进展记录</span>
@@ -184,7 +185,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NIcon, NTooltip } from 'naive-ui'
 import {
@@ -226,6 +227,40 @@ const summaryLoading = ref(false)
 const pendingTaskId = ref(null) // 从 URL 恢复的任务 id，等任务树加载后定位
 const showHidden = ref(false)   // 是否展示 hidden:true 的任务
 const progressCollapsed = ref(false)
+
+// 进展记录侧栏宽度（可拖动，localStorage 持久化）
+const WIDTH_KEY = 'projflow:progress-width'
+const MIN_W = 280
+const MAX_W = 800
+function loadWidth() {
+  const v = parseInt(localStorage.getItem(WIDTH_KEY), 10)
+  if (Number.isNaN(v)) return 440
+  return Math.min(MAX_W, Math.max(MIN_W, v))
+}
+const progressWidth = ref(loadWidth())
+const resizing = ref(false)
+let resizeStartX = 0
+let resizeStartW = 0
+
+function onResizeMove(e) {
+  progressWidth.value = Math.min(MAX_W, Math.max(MIN_W, resizeStartW - (e.clientX - resizeStartX)))
+}
+function stopResize() {
+  resizing.value = false
+  document.removeEventListener('mousemove', onResizeMove)
+  document.removeEventListener('mouseup', stopResize)
+  document.body.style.userSelect = ''
+  try { localStorage.setItem(WIDTH_KEY, String(progressWidth.value)) } catch { /* localStorage 不可用时静默 */ }
+}
+function startResize(e) {
+  resizing.value = true
+  resizeStartX = e.clientX
+  resizeStartW = progressWidth.value
+  document.addEventListener('mousemove', onResizeMove)
+  document.addEventListener('mouseup', stopResize)
+  document.body.style.userSelect = 'none'
+}
+onUnmounted(() => { if (resizing.value) stopResize() })
 
 const route = useRoute()
 const router = useRouter()
@@ -522,7 +557,7 @@ onMounted(loadProjects)
 
 .cornell-body {
   display: grid; gap: 20px; padding: 20px 0;
-  grid-template-columns: 1fr 440px;
+  grid-template-columns: 1fr var(--progress-w, 440px);
   flex: 1; min-height: 0;
   &:has(.cornell-right.collapsed) { grid-template-columns: 1fr 28px; }
   @media (max-width: 1100px) { grid-template-columns: 1fr; }
@@ -537,11 +572,18 @@ onMounted(loadProjects)
   }
 }
 .cornell-right {
+  position: relative;
   min-height: 0;
   border-left: 2px solid var(--color-border); padding-left: 16px;
   display: flex; flex-direction: column;
   @media (max-width: 900px) { border-left: none; border-top: 2px solid var(--color-border); padding-left: 0; padding-top: 16px; }
   &.collapsed { padding-left: 0; border-left: none; }
+  &.resizing .progress-resizer { background: var(--color-primary); opacity: 0.5; }
+  .progress-resizer {
+    position: absolute; left: -5px; top: 0; bottom: 0; width: 8px;
+    cursor: col-resize; z-index: 2;
+    &:hover { background: var(--color-primary); opacity: 0.3; }
+  }
   .progress-head {
     flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--color-text-dim); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;
     display: flex; align-items: center; justify-content: space-between;

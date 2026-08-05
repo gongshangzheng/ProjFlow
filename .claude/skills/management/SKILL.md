@@ -211,6 +211,14 @@ python3 $SD/list_tasks.py --slug <slug> --id <task-id>
 2. 完成条目：以 `[完成]` 开头，一句话结论（时间线标记用）；成果详情写进 `--summary`，不要塞进 progress。
 3. 每条 note ≤ 120 汉字。太长说明该拆子任务了。
 4. 不要写空泛的进展（"继续开发中"、"修了一些 bug"）。
+5. **记 commit**：这步工作产生了 commit 的，note 末尾注明 `(commit abc1234)`（短 hash），多个逗号分隔 `(commit abc1234, def5678)`。`[完成]` 条目同样适用。这样可通过 `show_commit.py` 直接回看真实更改。
+
+**通过 commit 追溯真实更改**（`show_commit.py`）：
+```bash
+python3 $SD/show_commit.py abc1234                      # 单个 commit 的 --stat 摘要
+python3 $SD/show_commit.py abc1234 --diff               # 完整 diff
+python3 $SD/show_commit.py --slug <slug> --id <task-id> # 列出该任务 progress 引用的所有 commit 并逐个 --stat
+```
 
 ### 1.3 完成总结（summary）写作规范
 

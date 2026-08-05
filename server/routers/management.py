@@ -1,4 +1,5 @@
 """项目管理路由"""
+import datetime
 import os
 import re
 import yaml
@@ -226,6 +227,19 @@ def _parse_frontmatter(content):
     return meta, body
 
 
+def _normalize_date(value):
+    """frontmatter 的 date 归一为字符串。
+
+    YAML 会把无引号的 `date: 2026-07-16` 解析成 datetime.date，与缺省值 ''
+    混在一起排序会抛 TypeError，故统一转 ISO 字符串。
+    """
+    if value is None:
+        return ''
+    if isinstance(value, (datetime.datetime, datetime.date)):
+        return value.isoformat()
+    return str(value)
+
+
 @router.get("/docs")
 async def get_docs():
     """获取文档列表（management/docs/ 递归扫描所有 .md 文件）"""
@@ -245,7 +259,7 @@ async def get_docs():
                 'slug': slug,
                 'title': meta.get('title', slug),
                 'author': meta.get('author', ''),
-                'date': meta.get('date', ''),
+                'date': _normalize_date(meta.get('date')),
                 'tags': meta.get('tags', []),
                 'summary': meta.get('summary', ''),
                 'id': meta.get('id'),
@@ -269,7 +283,7 @@ async def get_doc_detail(slug: str):
         'slug': slug,
         'title': meta.get('title', slug),
         'author': meta.get('author', ''),
-        'date': meta.get('date', ''),
+        'date': _normalize_date(meta.get('date')),
         'tags': meta.get('tags', []),
         'summary': meta.get('summary', ''),
         'id': meta.get('id'),
