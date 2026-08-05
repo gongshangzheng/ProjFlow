@@ -19,6 +19,10 @@ export const runTraining = (data) => request.post('/training/run', data)
 export const getTrainRuns = (params) => request.get('/training/runs', { params })
 export const getTrainRunDetail = (id) => request.get(`/training/runs/${id}`)
 
+// 训练 run 可视化样本（按 epoch 分组；url 为相对 outputs 根的路径）
+export const listVisSamples = (runId) => request.get(`/training/runs/${runId}/vis`)
+export const getVisSampleUrl = (path) => `/api/training/outputs/${path}`
+
 // checkpoint
 export const listCheckpoints = () => request.get('/training/checkpoints')
 export const getCheckpointDetail = (id) => request.get(`/training/checkpoints/${id}`)

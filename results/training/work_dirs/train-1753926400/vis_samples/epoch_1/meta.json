@@ -1,0 +1,7 @@
+{
+  "samples": [
+    { "file": "0.png", "gt_label": "walking", "pred_label": "walking", "score": 0.91, "correct": true },
+    { "file": "1.png", "gt_label": "running", "pred_label": "jumping", "score": 0.52, "correct": false },
+    { "file": "2.png", "gt_label": "sitting", "pred_label": "sitting", "score": 0.88, "correct": true }
+  ]
+}

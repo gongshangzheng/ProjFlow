@@ -1,0 +1,6 @@
+{
+  "samples": [
+    { "file": "0.png", "gt_label": "walking", "pred_label": "walking", "score": 0.95, "correct": true },
+    { "file": "1.png", "gt_label": "running", "pred_label": "running", "score": 0.79, "correct": true }
+  ]
+}

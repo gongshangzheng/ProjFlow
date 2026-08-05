@@ -7,16 +7,18 @@
   results/training/metrics.json     — 训练 run 列表（含 loss_series）
   results/training/checkpoints/     — trained .pth state_dicts
   results/training/logs/            — 训练日志
+  results/training/work_dirs/       — 训练框架 work_dir（实时 scalars + 可视化样本）
 """
+import glob
 import os
 import json
 import time
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import FileResponse
 
 from server.config import (
-    TRAINING_METRICS_JSON, CHECKPOINTS_DIR, TRAINING_OUTPUTS_DIR,
+    TRAINING_METRICS_JSON, CHECKPOINTS_DIR, TRAINING_OUTPUTS_DIR, TRAINING_WORK_DIR,
 )
 from server.utils.file_utils import read_file, safe_resolve
 
@@ -51,6 +53,83 @@ def _load_metrics() -> dict:
         return {"generated_at": None, "runs": data if isinstance(data, list) else []}
     except json.JSONDecodeError:
         return {"generated_at": None, "runs": []}
+
+
+def _save_metrics(data: dict) -> None:
+    """原子写 metrics.json（先写 .tmp 再 os.replace），避免训练中崩溃写坏文件。"""
+    os.makedirs(os.path.dirname(TRAINING_METRICS_JSON), exist_ok=True)
+    tmp = TRAINING_METRICS_JSON + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, TRAINING_METRICS_JSON)
+
+
+def _upsert_run(run: dict) -> None:
+    """按 id 幂等 upsert 一条 run 并刷新 generated_at。供下游训练脚本/端点复用。"""
+    data = _load_metrics()
+    runs = data.setdefault("runs", [])
+    for i, r in enumerate(runs):
+        if r.get("id") == run.get("id"):
+            runs[i] = {**r, **run}
+            break
+    else:
+        runs.append(run)
+    data["generated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    _save_metrics(data)
+
+
+# scalars.json 里非指标的键（不进曲线）
+_NON_METRIC_KEYS = {
+    "epoch", "iter", "step", "time", "data_time", "memory", "eta", "grad_norm", "step_type",
+}
+
+
+def _parse_scalars_live(path: str) -> list:
+    """实时读 scalars.json（训练中每行一条 JSON），按 epoch 合并成 loss_series。
+
+    领域无关：除 _NON_METRIC_KEYS 外的所有数值型键都收进曲线，
+    因此分类指标（top1_acc）与率失真指标（psnr/bpp）都能自动出图。
+    """
+    series = []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                epoch = obj.get("epoch")
+                if epoch is None:
+                    continue
+                rec = {"epoch": epoch}
+                for k, v in obj.items():
+                    if k in _NON_METRIC_KEYS or isinstance(v, bool):
+                        continue
+                    if isinstance(v, (int, float)):
+                        rec[k] = float(v)
+                existing = next((x for x in series if x["epoch"] == epoch), None)
+                if existing:
+                    existing.update(rec)
+                else:
+                    series.append(rec)
+        series.sort(key=lambda x: x["epoch"])
+    except OSError:
+        return []
+    return series
+
+
+def _read_json_meta(path: str) -> dict:
+    content = read_file(path)
+    if not content:
+        return {}
+    try:
+        data = json.loads(content)
+        return data if isinstance(data, dict) else {}
+    except json.JSONDecodeError:
+        return {}
 
 
 # ---- models（可训练 DL 模型）---------------------------------------------- #
@@ -139,12 +218,56 @@ async def get_runs(model: str = None, dataset: str = None, status: str = None):
 
 @router.get("/runs/{run_id}")
 async def get_run_detail(run_id: str):
-    """单条训练 run（含 loss_series）。"""
+    """单条训练 run（含 loss_series）。训练中实时读 work_dir 的 scalars.json 补曲线。"""
     data = _load_metrics()
     for r in data.get("runs", []):
         if r.get("id") == run_id:
+            if r.get("status") in ("running", "started"):
+                scalars = os.path.join(TRAINING_WORK_DIR, run_id, "vis_data", "scalars.json")
+                if os.path.isfile(scalars):
+                    live = _parse_scalars_live(scalars)
+                    if live:
+                        r["loss_series"] = live
             return r
-    return {"detail": "Run not found"}, 404
+    raise HTTPException(status_code=404, detail="Run not found")
+
+
+@router.get("/runs/{run_id}/vis")
+async def list_vis_samples(run_id: str):
+    """列出训练 run 的可视化样本，按 epoch 分组。
+
+    约定目录：work_dirs/{run_id}/vis_samples/epoch_N/ + 该目录内 meta.json：
+      {"samples": [{"file": "0.jpg", ...领域字段（gt_label/pred_label/score/correct 等）}]}
+    meta 字段原样透传，上游不规定领域语义；url 走 /outputs/{path} 按需服务。
+    """
+    base = safe_resolve(TRAINING_WORK_DIR, run_id, "vis_samples")
+    if not base or not os.path.isdir(base):
+        return {"groups": []}
+
+    def epoch_of(p):
+        try:
+            return int(os.path.basename(p).split("_")[1])
+        except (IndexError, ValueError):
+            return -1
+
+    groups = []
+    for epoch_dir in sorted(glob.glob(os.path.join(base, "epoch_*")), key=epoch_of):
+        epoch = epoch_of(epoch_dir)
+        if epoch < 0:
+            continue
+        meta = _read_json_meta(os.path.join(epoch_dir, "meta.json"))
+        samples = []
+        for s in (meta.get("samples") or []):
+            fn = s.get("file")
+            if not fn:
+                continue
+            samples.append({
+                **s,
+                "url": f"work_dirs/{run_id}/vis_samples/epoch_{epoch}/{fn}",
+                "exists": os.path.isfile(os.path.join(epoch_dir, fn)),
+            })
+        groups.append({"epoch": epoch, "samples": samples})
+    return {"groups": groups}
 
 
 # ---- checkpoints（trained .pth 文件）------------------------------------ #
@@ -183,7 +306,7 @@ async def get_checkpoint_detail(checkpoint_id: str):
     for fn in os.listdir(CHECKPOINTS_DIR) if os.path.isdir(CHECKPOINTS_DIR) else []:
         if os.path.splitext(fn)[0] == checkpoint_id:
             return {"checkpoint": f"checkpoints/{fn}", "run": None}
-    return {"detail": "Checkpoint not found"}, 404
+    raise HTTPException(status_code=404, detail="Checkpoint not found")
 
 
 # ---- outputs（按需服务 checkpoint/log 文件，防穿越）---------------------- #
@@ -211,13 +334,20 @@ async def list_outputs():
 
 @router.get("/outputs/{file_path:path}")
 async def serve_output(file_path: str):
-    """按需服务一个训练产物文件（.pth checkpoint / .log 日志），流式 FileResponse。
+    """按需服务一个训练产物文件（.pth checkpoint / .log 日志 / 可视化样本图），流式 FileResponse。
 
     路径经 safe_resolve 必须位于 TRAINING_OUTPUTS_DIR 内，防穿越。
     """
     safe = safe_resolve(TRAINING_OUTPUTS_DIR, file_path)
     if not safe or not os.path.isfile(safe):
-        return {"detail": "Output not found"}, 404
+        raise HTTPException(status_code=404, detail="Output not found")
     ext = os.path.splitext(safe)[1].lower()
+    image_media = {
+        ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+        ".gif": "image/gif", ".webp": "image/webp",
+    }
+    if ext in image_media:
+        # 图片内联展示（不带 filename，避免 Content-Disposition: attachment）
+        return FileResponse(safe, media_type=image_media[ext])
     media = {".pth": "application/octet-stream", ".log": "text/plain", ".json": "application/json"}.get(ext, "application/octet-stream")
     return FileResponse(safe, media_type=media, filename=os.path.basename(safe))

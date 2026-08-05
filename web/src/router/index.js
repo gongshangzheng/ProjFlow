@@ -118,6 +118,13 @@ const routes = [
         component: () => import('../views/papers/SourceConfig.vue'),
         meta: { title: '数据源配置', module: 'papers' },
       },
+      // 数据集（文件系统浏览器）
+      {
+        path: 'datasets',
+        name: 'DatasetBrowser',
+        component: () => import('../views/datasets/DatasetBrowser.vue'),
+        meta: { title: '数据集', module: 'datasets' },
+      },
       // 评测体系
       {
         path: 'evaluation',
@@ -128,6 +135,12 @@ const routes = [
         name: 'EvalRun',
         component: () => import('../views/evaluation/EvalRun.vue'),
         meta: { title: '评测运行', module: 'evaluation' },
+      },
+      {
+        path: 'evaluation/speedrun',
+        name: 'SpeedRun',
+        component: () => import('../views/evaluation/SpeedRun.vue'),
+        meta: { title: 'Speed Run', module: 'evaluation' },
       },
       {
         path: 'evaluation/results',
@@ -172,6 +185,12 @@ const routes = [
         name: 'TrainResults',
         component: () => import('../views/training/TrainResults.vue'),
         meta: { title: '训练结果', module: 'training' },
+      },
+      {
+        path: 'training/runs/:run_id',
+        name: 'TrainRunDetail',
+        component: () => import('../views/training/TrainRunDetail.vue'),
+        meta: { title: '运行详情', module: 'training' },
       },
       {
         path: 'training/models',

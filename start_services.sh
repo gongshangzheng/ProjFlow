@@ -4,6 +4,14 @@
 
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# --- Node 版本：切到 nvm 的 v22，避免 conda 自带 node 20.17 触发 Vite 引擎告警 ---
+# 注：nvm use 在 conda/cmux 环境下 prepend 不生效，故手动把 nvm v22 bin 插到 PATH 最前
+NVM_NODE_BIN="$(printf '%s\n' "$HOME"/.nvm/versions/node/v22.*/bin | sort -V | tail -1)"
+if [ -n "$NVM_NODE_BIN" ] && [ -x "$NVM_NODE_BIN/node" ]; then
+  export PATH="$NVM_NODE_BIN:$PATH"
+  hash -r 2>/dev/null
+fi
+
 # 检查端口是否被占用，如果是则报告冲突并退出
 check_port_conflict() {
   local port=$1

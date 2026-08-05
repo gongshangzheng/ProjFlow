@@ -1,0 +1,4 @@
+{"epoch": 1, "iter": 100, "loss": 2.1043, "top1_acc": 0.3120, "lr": 0.0002, "time": 0.412, "memory": 4096}
+{"epoch": 2, "iter": 200, "loss": 1.5521, "top1_acc": 0.5210, "lr": 0.0002, "time": 0.409, "memory": 4096}
+{"epoch": 3, "iter": 300, "loss": 1.1077, "top1_acc": 0.6408, "lr": 0.00018, "time": 0.415, "memory": 4096}
+{"epoch": 4, "iter": 400, "loss": 0.8834, "top1_acc": 0.7011, "lr": 0.00015, "time": 0.411, "memory": 4096}
