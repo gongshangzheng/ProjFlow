@@ -2,6 +2,7 @@
 import datetime
 import os
 import re
+import json
 import yaml
 from fastapi import APIRouter, HTTPException
 from server.config import MANAGEMENT_DIR
@@ -279,6 +280,13 @@ async def get_doc_detail(slug: str):
         raise HTTPException(status_code=404, detail="Doc not found")
     content = read_file(filepath)
     meta, body = _parse_frontmatter(content)
+    sidecar = {}
+    sidecar_path = safe_resolve(_DOCS_DIR, f"{slug}.json")
+    if sidecar_path and os.path.isfile(sidecar_path):
+        try:
+            sidecar = json.loads(read_file(sidecar_path) or '{}')
+        except (json.JSONDecodeError, ValueError):
+            sidecar = {}
     return {
         'slug': slug,
         'title': meta.get('title', slug),
@@ -288,6 +296,7 @@ async def get_doc_detail(slug: str):
         'summary': meta.get('summary', ''),
         'id': meta.get('id'),
         'content': body,
+        'sidecar': sidecar,
     }
 
 
