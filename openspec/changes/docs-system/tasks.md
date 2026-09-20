@@ -3,12 +3,12 @@
 ## 1. 体系治理
 
 - [x] 1.1 文档登记表落库（本 design）
-- [ ] 1.2 双层流程写入 `.agents/skills/documentation/SKILL.md` §0（总 Change + 单篇 Change、design 先行、豁免标准、结构变更纪律）
-- [ ] 1.3 各篇补齐单篇 Change（按需，结构级变更时开）
+- [x] 1.2 双层流程写入 `.agents/skills/documentation/SKILL.md` §0（总 Change + 单篇 Change、design 先行、豁免标准、结构变更纪律）
+- [x] 1.3 各篇补齐单篇 Change（按需触发：当前两篇均无结构级变更需求，待首次单篇重构时开 docs-<slug>；依据为 2026-09-20 引用核对时两篇内容稳定）
 
 ## 2. 引用健康
 
-- [ ] 2.1 api-design-conventions、git-workflow 引用闭合核对（悬空 = 0）
+- [x] 2.1 api-design-conventions、git-workflow 引用闭合核对（悬空 = 0）
 
 ## 3. 文档系统功能（前端 / 渲染层）
 
