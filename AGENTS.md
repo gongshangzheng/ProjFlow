@@ -41,6 +41,18 @@ cd ProjFlow/web
 nohup npx vite --port 3210 --strict-port </dev/null > /tmp/frontend.log 2>&1 & disown
 ```
 
+> ⚠️ **从本项目初始化新项目时必须替换端口**
+>
+> 前端 3210 / 后端 8809 是 ProjFlow 的固定端口。若以本仓库为脚手架克隆出新项目（如 ai-api-research），
+> 必须全局替换为一组新端口，否则两个项目无法同时运行（启动脚本会检测到端口冲突直接退出）。
+>
+> 需要同步修改的位置共 3 处：
+> 1. `start_services.sh` — 后端 8809、前端 3210（含端口冲突检查逻辑）
+> 2. `web/vite.config.js` — `server.port`（3210）和 `/api` 代理 target（8809）
+> 3. `server/config.py` — `CORS_ORIGINS` 中的 3210
+>
+> 建议：新项目选定端口后先 `lsof -i :<新端口>` 确认空闲，再全局搜索替换旧端口号。
+
 ## 目录结构
 
 ```
