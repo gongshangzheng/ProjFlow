@@ -72,21 +72,34 @@ git checkout upstream/main -- web/src/views/evaluation/ web/src/components/commo
 
 > 注意：`git checkout upstream/main -- <path>` 取回的文件会**覆盖**工作区同名文件（用上游版本替换），所以只对「下游该文件应等于上游」的路径用；对已定制分叉的路径别用，否则丢下游定制。
 
-### 下游改了共享脚手架 → port 回上游
+### 下游改了共享脚手架 → port 回上游（上游侧操作）
 
 ```bash
-# 在下游：先把改动整理成 [shared] commit
-git add server/parsers/markdown_table.py
-git commit -m "[shared] fix: parser 空表导致 tasks_parser 位置映射错位"
+# 在下游：先把改动整理成 [shared] commit（纯共享内容最好；混入领域数据也能处理，见下表）
+git commit -m "[shared] fix: ..."
 
-# port 到上游（在上游工作树里应用同一 patch，或 cherry-pick 下游的 commit）
+# 在上游：直接 fetch 下游仓库（本地路径即可，无需配 remote）
 cd <上游工作树>
-git cherry-pick <下游的 [shared] commit SHA>   # 下游 SHA 在上游重写后可见吗?——
-# 注意：下游 commit 的 SHA 是嫁接后重写的，上游没有这些对象。
-# 实操：在下游 git format-patch -1 HEAD，到上游 git am <patch>。
-git format-patch -1 HEAD --stdout > /tmp/shared.patch   # 在下游
-# (切到上游) git am < /tmp/shared.patch
+git fetch ~/pet-action-recognition main        # 或其他下游库路径
+git cherry-pick <下游的 [shared] commit SHA>   # fetch 后对象与 SHA 直接可用
+git commit --amend -m "[shared] <原信息>（pick 自 pet <SHA>）"  # 标注来源
 ```
+
+嫁接只重写了下游自身的 commit SHA，不影响上游 pick：fetch 之后对象就在本地，cherry-pick 零障碍（实证：pet cb76c36 / bafbe23 → 上游 bd91ac2 / aacb342，2026-09-20）。旧方案（下游 `format-patch` → 上游 `git am`）仍可用，但已无必要。
+
+**混合 commit 的冲突按文件归属分类解决**（下游 commit 混着领域数据是常态，不是例外）：
+
+| 文件类型 | 解法 |
+|---------|------|
+| 共享脚手架（`server/`、`web/src/`、`start_services.sh`、共享 skill） | 取 theirs（无冲突则自动套上） |
+| 下游领域数据（`management/` 数据、领域 docs、`results/`、`*.db`） | `git rm`，永不进上游 |
+| 下游的 openspec change 勾选（tasks.md） | 取 ours（`git checkout --ours`），事后在本库对应 change 手动勾选并注明 pick 来源 |
+| 冲突的 import 块 | 只留下游新代码实际用到的 import，弃下游特有残留（例：只取 `import json`，弃 datetime/hashlib/subprocess） |
+
+**注意事项**：
+- 上游存在 **untracked 同名文件会直接阻塞 cherry-pick**（报 "would be overwritten by merge"）——先把本库未入库文件 commit 掉再 pick。
+- pick 含后端改动的 commit 后需**重启 uvicorn** 才生效；改完勾选本库对应 change 的 tasks 并浏览器实测。
+- 多个 commit 有依赖（如面板收起叠在 sidecar 底座上）时，**按拓扑序连着 pick**，后面的才能干净套上。
 
 上游落地后，再由各兄弟下游 `git fetch upstream && git cherry-pick <上游SHA>` 取回——形成"下游发现 → port 回上游 → 传播到所有下游"的闭环。
 

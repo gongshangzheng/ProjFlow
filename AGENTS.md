@@ -179,6 +179,7 @@ evaluation/ 目录（JSON 文件）
 2. **提交信息格式**：`<type>: <描述>`，如 `feat: 添加任务筛选`、`fix: 修复分页问题`
 3. **type 取值**：feat（新功能）、fix（修复）、refactor（重构）、style（样式）、docs（文档）、chore（杂项）
 4. **禁止提交**：`node_modules/`、`__pycache__/`、`.venv/`、`.env`、`*.db`、`papers/data/`、`papers/cache/`
+5. **跨库传播**：共享脚手架改进在上/下游间的 cherry-pick 双向操作与冲突分类解法，见 `.agents/skills/upstream-sync/SKILL.md`（含实证命令序列）
 
 ### 前端开发
 
