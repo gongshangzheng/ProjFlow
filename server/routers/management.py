@@ -210,7 +210,16 @@ async def get_meeting_detail(date: str):
 # ========== 文档 (wiki) ==========
 
 _DOCS_DIR = os.path.join(MANAGEMENT_DIR, 'docs')
-_SLUG_RE = re.compile(r'^[a-zA-Z0-9_/-]+$')
+# slug 允许 Unicode 单词字符（含中文）、空格、下划线、连字符与斜杠；
+# 路径穿越由 _valid_doc_slug 显式拒绝 + safe_resolve 根目录约束双重防护。
+_SLUG_RE = re.compile(r'^[\w][\w \-/]*$', re.UNICODE)
+
+
+def _valid_doc_slug(slug: str) -> bool:
+    """校验文档 slug：允许中文等 Unicode 字符，拒绝空与 .. 路径段。"""
+    if not slug or not _SLUG_RE.match(slug):
+        return False
+    return '..' not in slug.split('/')
 
 
 def _parse_frontmatter(content):
@@ -272,8 +281,8 @@ async def get_docs():
 
 @router.get("/docs/{slug:path}")
 async def get_doc_detail(slug: str):
-    """获取指定文档详情（支持子目录路径，如 architecture/api-design）"""
-    if not _SLUG_RE.match(slug):
+    """获取指定文档详情（支持子目录路径与中文文件名）"""
+    if not _valid_doc_slug(slug):
         raise HTTPException(status_code=400, detail="Invalid slug")
     filepath = safe_resolve(_DOCS_DIR, f"{slug}.md")
     if not filepath or not os.path.isfile(filepath):
