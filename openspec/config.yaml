@@ -1,0 +1,39 @@
+schema: spec-driven
+
+context: |
+  ProjFlow：通用项目管理 demo 平台。三大模块：项目管理（management/，Markdown 文件）、
+  论文搜集（SQLite data/papers.db）、评测体系（evaluation/ JSON 文件）。
+  技术栈：FastAPI (Python 3.9, server/) + Vue 3 + Naive UI (web/)，Vite 3210 代理 /api 到 8809。
+  约定：代码改动前必须走 OpenSpec 流程；共享脚手架层改动按 upstream-sync 铁律 port 回上游；
+  文档变更遵循 docs-system 总 Change 的双层流程与登记表。
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
