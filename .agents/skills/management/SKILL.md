@@ -13,7 +13,7 @@ description: |
 
 > **任务数据单源**：任务（看板 + 项目树）的唯一来源是 **per-project `management/projects/{slug}/tasks.json`**（层级树）。看板（TaskBoard）是它的**派生视图**——按 status 展平成 3 桶，按项目切换。`tasks.md` 已废弃删除。成员/报表/会议/里程碑仍是 markdown。
 
-## 脚本一览（`.claude/skills/management/scripts/`）
+## 脚本一览（`.agents/skills/management/scripts/`）
 
 脚本 **self-locating**（用 `parents[4]` 解析仓库根），同一份文件在上下游都能跑（两库 `tasks.json` schema 一致）。纯标准库，`python3` 直接运行。
 
@@ -96,7 +96,7 @@ management/
   - **不要手写 progress**：始终通过 `--progress` 脚本追加，不要直接编辑 tasks.json 的 progress 数组（日期格式、unshift 顺序容易出错）。
 
 ```bash
-SD=.claude/skills/management/scripts
+SD=.agents/skills/management/scripts
 
 # 新增根级任务（id 自动生成 tN）
 python3 $SD/add_task.py --slug myproject --title "模块X开发" --status active \
@@ -321,7 +321,7 @@ python3 $SD/delete_meeting.py --date 2026-07-11
 
 文件：`management/docs/`（纯 wiki 目录，递归扫描所有 `.md` 文件，支持子目录）。前端通过 `DocPage.vue` 展示（列表+详情同一组件），支持 `[[slug]]` 和 `[[slug|显示文本]]` 文档链接、`[[proj#task]]` 任务链接（MarkdownRenderer 自动转换）。
 
-> **内容写作规范**：文档结构、Mermaid 图表、链接用法、写作风格等见 **`documentation` skill**（`.claude/skills/documentation/SKILL.md`）。本 skill 只负责文件的 CRUD 操作。
+> **内容写作规范**：文档结构、Mermaid 图表、链接用法、写作风格等见 **`documentation` skill**（`.agents/skills/documentation/SKILL.md`）。本 skill 只负责文件的 CRUD 操作。
 
 YAML frontmatter 格式：
 
@@ -368,7 +368,7 @@ python3 $SD/delete_doc.py --slug jwt-auth-guide
 ## 常用命令
 
 ```bash
-SD=.claude/skills/management/scripts
+SD=.agents/skills/management/scripts
 python3 $SD/list_tasks.py --slug myproject          # 看任务树
 python3 $SD/list_tasks.py --slug myproject --flat   # 看展平看板桶
 python3 $SD/list_tasks.py --slug myproject --id t2-3  # 按 ID 精确定位任务详情

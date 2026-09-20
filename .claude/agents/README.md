@@ -5,12 +5,17 @@
 ## 目录约定
 
 ```
-.claude/
-├── skills/             # 主 agent 使用的 skill 指南（SKILL.md + scripts/）
-└── agents/             # 主 agent 通过 Agent 工具派生 subagent 时使用的提示词
-    ├── README.md       # 本文件
-    └── <name>.md       # 单个 subagent 的 prompt + 用法说明
+<repo root>
+├── .agents/
+│   └── skills/          # 主 agent 使用的 skill 指南（**真实目录**；pi 等项目级位置原生读取）
+└── .claude/
+    ├── skills -> ../.agents/skills   # 兼容符号链接：Claude Code 按 .claude/skills 读取，内容同一份
+    └── agents/          # 主 agent 通过 Agent 工具派生 subagent 时使用的提示词（真实目录）
+        ├── README.md    # 本文件
+        └── <name>.md    # 单个 subagent 的 prompt + 用法说明
 ```
+
+> skill 的真实位置是 `.agents/skills/`（多 harness 通用约定），`.claude/skills` 只是为 Claude Code 保留的符号链接；引用 skill 路径时一律写 `.agents/skills/...`。
 
 **分工原则**：
 - `skills/` 回答"主 agent 怎么做这件事"（流程、脚本、文件路径、数据 schema）

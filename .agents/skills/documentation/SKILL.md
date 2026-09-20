@@ -153,7 +153,7 @@ id: 1
 
 ## 3. Mermaid 图表
 
-Mermaid 是文档中表达流程、时序、架构的首选方式。完整速查见 `.claude/skills/documentation/references/mermaid-cheatsheet.md`。
+Mermaid 是文档中表达流程、时序、架构的首选方式。完整速查见 `.agents/skills/documentation/references/mermaid-cheatsheet.md`。
 
 常用场景：
 
@@ -263,4 +263,4 @@ flowchart TD
 
 ## 参考文件
 
-- `.claude/skills/documentation/references/mermaid-cheatsheet.md` — Mermaid 语法速查与项目常用图例
+- `.agents/skills/documentation/references/mermaid-cheatsheet.md` — Mermaid 语法速查与项目常用图例

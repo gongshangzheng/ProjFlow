@@ -3,7 +3,7 @@
 These helpers are **self-locating** (resolve the repo root from the script's
 own path via ``parents[4]``), so the SAME script file works unchanged in both
 upstream and downstream repos as long as it lives at
-``.claude/skills/<management-skill>/scripts/``.
+``.agents/skills/<management-skill>/scripts/``.
 
 The markdown table editor is **schema-agnostic**: it auto-detects columns
 from each section's header row, so it works on ``tasks.md`` (3 sections,
@@ -26,7 +26,7 @@ import tempfile
 from datetime import date
 from pathlib import Path
 
-# .claude/skills/<skill>/scripts/X.py -> repo root is parents[4]
+# .agents/skills/<skill>/scripts/X.py -> repo root is parents[4]
 REPO_ROOT = Path(__file__).resolve().parents[4]
 MGMT_DIR = REPO_ROOT / "management"
 
