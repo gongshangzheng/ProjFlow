@@ -2,7 +2,7 @@
 name: upstream-sync
 description: |
   上游/下游拓扑与责任分工指南。说明上游=共享脚手架 owner、infraredComp/pet-action-recognition/DigitalTeacher=下游（嫁接上游 root 为公共祖先），以及如何把共享改进从上游传播到下游。
-  触发场景：(1) 在上游改了共享脚手架想同步到下游 (2) 下游想 fetch 上游改进 (3) 判断某个改动该落在上游还是下游 (4) 理解四库的 git 历史关系
+  触发场景：(1) 在上游改了共享脚手架想同步到下游 (2) 下游想 fetch 上游改进 (3) 判断某个改动该落在上游还是下游 (4) 理解四库的 git 历史关系 (5) 从上游初始化一个新库
 ---
 
 # 上游 / 下游拓扑与责任分工
@@ -22,6 +22,8 @@ infraredComp  pet-action  DigitalTeacher   (downstream, 下游)
 
 - **上游**（branch `main`）：共享全栈脚手架的唯一 owner。
 - **下游 = infraredComp / pet-action-recognition / DigitalTeacher**：各自 `git remote add upstream <上游URL>`，已嫁接上游 root 为历史公共祖先（`git merge-base HEAD upstream/main` = `159e4aa`）。
+
+> **初始化新库**：从上游拉出新库后，**在新库内执行 openspec change `fork-init-guide`**（tasks 即完整适配清单：端口 / OpenSpec 目录 / 命名 / 领域数据 / 依赖坑 / `HIDDEN_KEYS` 功能隐藏），完成后 `openspec archive fork-init-guide`。
 
 > 嫁接后四库提交日期非单调（上游 2026-07-10 是 infraredComp 2026-06-23 的祖先），属正常——git 允许，不影响功能。所有下游 commit SHA 已重写（force-push），旧 SHA 失效。
 

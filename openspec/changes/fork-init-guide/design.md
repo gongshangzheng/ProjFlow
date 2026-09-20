@@ -46,11 +46,12 @@
 - 功能隐藏引用 `HIDDEN_KEYS`（`web/src/config/hidden.js`，可用 key 注释齐全），不重复列 key 表
 - 危险操作（数据删除）限定路径白名单，避免误删共享脚手架文件
 
-### D5: 上游侧准备随本 change 一次性完成
+### D5: 上游侧入口不写入本 change 任务
 
-- `AGENTS.md`：启动服务一节的端口适配提示处追加一行"从本库初始化新库后，第一件事：在新库执行 openspec change `fork-init-guide`"
+- 入口指引（`AGENTS.md` 一行 + `SKILL.md` 触发场景/指引行）属上游日常文档维护，**直接提交**；本 change 的 tasks 只含新库执行内容，避免 change 在上游出现「部分完成」的歧义态
+- `AGENTS.md`：启动服务一节的端口适配提示处追加一行「从本库初始化新库后，第一件事：在新库执行 openspec change `fork-init-guide`」
 - `upstream-sync/SKILL.md`：frontmatter 触发场景 + 拓扑节末尾一行指引
-- 两处均为纯指引文本，属本 change 在上游的落地内容（任务 0）
+- 两处均为纯指引文本
 
 ## Risks / Trade-offs
 

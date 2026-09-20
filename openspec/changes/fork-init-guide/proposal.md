@@ -7,7 +7,7 @@ ProjFlow（上游）已被多个库当脚手架初始化（infraredComp / pet-ac
 ## What Changes
 
 - **tasks.md 即新库适配清单**（本 change 的核心产出）：端口替换 → OpenSpec 目录适配 → 项目身份重命名 → 领域数据清理 → 依赖安装（registry 坑）→ `HIDDEN_KEYS` 功能隐藏（依赖已落地的 `add-menu-hidden-config`，commit `ff49e31`）→ 双服务自检 → 首次 commit → archive 本 change
-- **上游侧一次性准备**（已随本 change 完成）：`AGENTS.md` 与 `.agents/skills/upstream-sync/SKILL.md` 各加一行入口说明——新库 agent 发现未执行的 `fork-init-guide` 时立即执行
+- **发现机制**（不属本 change 任务，由上游直接维护）：`AGENTS.md` 与 `.agents/skills/upstream-sync/SKILL.md` 各一行入口说明——新库 agent 发现未执行的 `fork-init-guide` 时立即执行（已完成）
 - 上游不产出独立参考文档（撤销此前 `references/fork-init.md` 方案——静态文档会过期，change 是带 checkbox 的活清单）
 
 ## Capabilities

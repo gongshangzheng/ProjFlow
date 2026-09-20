@@ -1,13 +1,9 @@
 # Tasks: fork-init-guide
 
-> **本 change 是新库初始化适配清单。** 上游（ProjFlow）永不执行任务 1–7；
+> **本 change 是新库初始化适配清单。** 上游（ProjFlow）永不执行以下任务；
 > 新库从本库初始化后，第一件事就是在**新库内**执行本 change（走 `openspec-apply-change` 流程），
 > 全部完成后 `openspec archive fork-init-guide`。
-
-## 0. 上游侧准备（在 ProjFlow 完成，新库勿执行）
-
-- [ ] 0.1 `AGENTS.md` 启动服务一节端口提示后追加一行：从本库初始化新库后，第一件事是在新库执行 openspec change `fork-init-guide`
-- [ ] 0.2 `.agents/skills/upstream-sync/SKILL.md` 触发场景加「从上游初始化新库」，拓扑节末尾加一行指引到本 change
+> 发现机制（AGENTS.md / upstream-sync SKILL.md 的入口指引）属上游日常维护，不属本 change。
 
 ## 1. 端口适配（新库执行）
 

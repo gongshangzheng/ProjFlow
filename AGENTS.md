@@ -52,6 +52,10 @@ nohup npx vite --port 3210 --strict-port </dev/null > /tmp/frontend.log 2>&1 & d
 > 3. `server/config.py` — `CORS_ORIGINS` 中的 3210
 >
 > 建议：新项目选定端口后先 `lsof -i :<新端口>` 确认空闲，再全局搜索替换旧端口号。
+>
+> 📋 **从本库初始化新库后的第一件事**：在新库内执行 openspec change `fork-init-guide`
+> （走 `openspec-apply-change` 流程；tasks 即完整适配清单：端口 / OpenSpec 目录 / 命名 / 数据 / 依赖 / 功能隐藏 / 自检）。
+> 完成后 `openspec archive fork-init-guide`。
 
 ## 目录结构
 
