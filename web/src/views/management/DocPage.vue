@@ -157,7 +157,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NSpin, NTag, NSelect, NButton, NModal, NTimeline, NTimelineItem, NIcon } from 'naive-ui'
 import { ChevronBackOutline, ChevronForwardOutline } from '@vicons/ionicons5'
@@ -165,6 +165,7 @@ import MarkdownRenderer from '../../components/common/MarkdownRenderer.vue'
 import EmptyState from '../../components/common/EmptyState.vue'
 import { getDocList, getDocDetail } from '../../api/management'
 import { extractToc, slugify } from '../../utils/markdown'
+import { attachScrollMemory, findScrollContainer, restoreOrReset } from '../../utils/scrollMemory'
 
 const route = useRoute()
 const router = useRouter()
@@ -175,6 +176,10 @@ const loading = ref(false)
 const listLoading = ref(false)
 const showChangelog = ref(false)
 const showProgress = ref(false)
+
+// 滚动位置记忆：pendingRestoreKey 仅在整页加载（刷新）时设置
+let pendingRestoreKey = null
+let scrollMemory = null
 
 const SIDEBAR_COLLAPSED_KEY = 'doc-page.sidebar-collapsed'
 const TOC_COLLAPSED_KEY = 'doc-page.toc-collapsed'
@@ -281,6 +286,12 @@ async function fetchDoc(slug) {
     currentDoc.value = null
   }
   loading.value = false
+  // 内容就绪后恢复位置：整页加载（刷新）与 SPA 内切换文档走同一条路径
+  if (pendingRestoreKey) {
+    const key = pendingRestoreKey
+    pendingRestoreKey = null
+    restoreOrReset(key, () => !loading.value && !!currentDoc.value)
+  }
 }
 
 async function fetchDocList() {
@@ -294,16 +305,31 @@ async function fetchDocList() {
 }
 
 onMounted(async () => {
+  // 整页加载（含刷新）：标记待恢复的 key，内容就绪后由 fetchDoc 触发恢复
+  pendingRestoreKey = route.path
   await fetchDocList()
   if (currentSlug.value) {
     await fetchDoc(currentSlug.value)
   } else if (docsList.value.length) {
     router.replace(`/management/docs/${docsList.value[0].slug}`)
   }
+  scrollMemory = attachScrollMemory(findScrollContainer(), () => route.path)
+})
+
+onBeforeUnmount(() => {
+  scrollMemory?.dispose()
+  scrollMemory = null
 })
 
 watch(currentSlug, (slug) => {
   if (slug) fetchDoc(slug)
+})
+
+// 路由变化（含 router-link / 前进后退）：先结算旧文档位置，再待新文档内容就绪后恢复/回顶
+watch(() => route.path, (path, oldPath) => {
+  if (path === oldPath) return
+  scrollMemory?.noteRouteChange(path)
+  pendingRestoreKey = path
 })
 
 watch(currentSlug, (slug) => {
