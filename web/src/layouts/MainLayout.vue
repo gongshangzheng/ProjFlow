@@ -81,11 +81,32 @@ import {
 } from '@vicons/ionicons5'
 import { useThemeStore } from '../stores/theme'
 import { HIDDEN_KEYS, filterHidden } from '../config/hidden'
+import { SIDEBAR_DEFAULT_COLLAPSED } from '../config/layout'
 
 const route = useRoute()
 const router = useRouter()
 const themeStore = useThemeStore()
-const collapsed = ref(false)
+
+const SIDEBAR_COLLAPSED_KEY = 'app.sidebar-collapsed'
+
+function readCollapsed() {
+  try {
+    const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
+    if (stored === null) return SIDEBAR_DEFAULT_COLLAPSED
+    return stored === '1'
+  } catch {
+    return SIDEBAR_DEFAULT_COLLAPSED
+  }
+}
+
+const collapsed = ref(readCollapsed())
+
+// 持久化用户偏好（不设 immediate：避免初始化时把默认值写进存储，
+// 否则用户永远无法通过删除该 key 回到默认值）
+watch(collapsed, (value) => {
+  try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? '1' : '0') } catch { /* ignore */ }
+})
+
 const manualExpanded = ref(null)
 
 const expandedKeys = computed(() => {
