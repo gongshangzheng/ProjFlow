@@ -97,7 +97,9 @@ description: |
 - **注意**：`management/projects/{slug}/notes/` 是任务笔记目录，**不是** wiki 文档目录。通用文档必须放 `management/docs/`。
 - **仓库根目录不设 `docs/`**：说明性文档统一置于 `management/docs/`（`AGENTS.md` 与 `documentation` spec 同款约定）。
 - **frontmatter 必填**：`title`、`author`、`date`、`tags`、`summary`。
-- **frontmatter 可选**：`id`（数字），用于控制文档列表排序。有 `id` 的文档按 `id` 升序排列在前，无 `id` 的按 `date` 降序排列在后。
+- **frontmatter 可选**：`id`（数字）与 `order`（数字），用于控制列表排序。排序链为 **文件夹优先级 → `order` → `id` → `date` 降序 → `slug`**（与 `server/routers/management.py:_doc_sort_key` 一致）；缺 `order` / `id` 的文档排在有值的之后。
+- **`order` 建议用 10、20、30 空档**：日后要在中间插入新文档时可直接取中点，不必改动既有文档。
+- **sidecar 可选**：同名 `<slug>.json` 承载 `changelog` / `progress` / `appendix` / `related`。其中 `related` 的每一项必须是含 `slug` 与 `title`（可带 `desc`）的**对象**，不能写成字符串。维护 `order` 见 §1.6。
 
 ```yaml
 ---
@@ -208,6 +210,35 @@ $$
 - 公式内容首尾不能是空白（`$ x $` 会被当普通文本）；`$` 紧邻数字也不会当公式（`$5 到 $10` 保持字面）
 - **Mermaid 图节点内**用 `$$...$$`（单 `$` 不渲染，是 Mermaid 自身规则）：`A["输入 $$x_t$$"] --> B["损失 $$\mathcal{L}$$"]`
 - 需要保真原式（便于复制/对照论文）时，可额外附代码块保留 LaTeX 源码
+
+### 1.6 文档顺序工具（`order`）
+
+`./scripts/docs_order.py` 是随本 skill 提供的 `order` 维护工具，**只用 Python 标准库**，仅写文档时手工调用（服务运行不依赖它）：
+
+```bash
+# 只读：列出当前阅读顺序、整数空位与重复值
+python3 .agents/skills/documentation/scripts/docs_order.py list management/docs
+
+# 插入新文档（默认 dry-run，只打印计划）
+python3 .agents/skills/documentation/scripts/docs_order.py insert management/docs \
+  --title "新文档" --author "作者" --after "已有文档的标题或 slug" --create
+
+# 确认计划无误后加 --apply 才写盘
+python3 .agents/skills/documentation/scripts/docs_order.py insert management/docs \
+  --title "新文档" --author "作者" --after "已有文档的标题或 slug" --create --apply
+
+# 需要 10/20/30 连续时：新篇取插入点，其后顺延（前缀不动）
+python3 .agents/skills/documentation/scripts/docs_order.py insert management/docs \
+  --title "新文档" --author "作者" --after "参考文档" --create --shift --apply
+
+# 明确要规范化整个目录时
+python3 .agents/skills/documentation/scripts/docs_order.py renumber management/docs --apply
+```
+
+- **所有改写命令默认 dry-run**，只有显式 `--apply` 才写盘；优先占用相邻文档间的整数空位，不改既有文档（`--shift` 才重排插入点及其后）。
+- 拒绝重复 `order`、多个 `order:` 行与不合法 frontmatter（除非显式 `--force`）；写入后做结构校验，失败时回滚该文件。
+- `--author` 是必填项 —— frontmatter 的 `author` 为必填，工具不代你编造。
+- 排序键与后端 `_doc_sort_key` **同源**：后端排序链若变更，本脚本需同步，否则插入位置会与页面顺序不一致。
 
 ## 3. Mermaid 图表
 
@@ -322,3 +353,19 @@ flowchart TD
 ## 参考文件
 
 - `.agents/skills/documentation/references/mermaid-cheatsheet.md` — Mermaid 语法速查与项目常用图例
+
+## 7. 交付检查
+
+提交文档前逐条核对：
+
+- [ ] 章节结构与**已审核的 design** 一致（没写 design 的结构级改动本身就不合规，见 §1.2）
+- [ ] 事实可追溯，未编造领域背景 / 引文 / 实验结果 / 未披露配置
+- [ ] 正文不含历史信息（历史归 sidecar `changelog`，见 §1.4）
+- [ ] 文档已登记在 `openspec/registry.md`（wiki 文档）
+- [ ] 内部链接目标存在；文内锚点与实际标题一致
+- [ ] 图片用绝对 `/api/management/docs-assets/...` URL，且资产文件存在
+- [ ] sidecar JSON 合法；`related` 项是对象而非字符串
+- [ ] `order` 无重复（`docs_order.py list` 可查）
+- [ ] Mermaid 可渲染；公式只用 `$...$` / `$$...$$`
+- [ ] `openspec validate --strict` 通过
+- [ ] 论文笔记：另跑 `.agents/skills/article-note/scripts/validate-note.py`
