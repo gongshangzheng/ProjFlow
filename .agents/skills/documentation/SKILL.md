@@ -151,6 +151,33 @@ id: 1
 
 > 用 `#` 区分：含 `#` 的是任务链接，不含的是文档链接（文档 slug 可含 `/`）。
 
+### 1.4 图片与图题
+
+**存放**：`management/docs/_assets/<slug>/`（下划线前缀表明该目录非文档；文档列表只扫描 `*.md`，图片不会被当成文档）。`<slug>` 与所属文档 slug 对齐。
+
+**引用**（必须用绝对 URL）：
+
+```markdown
+![图 1 · MaskGIT 整体架构](/api/management/docs-assets/maskgit-2022/fig-1-arch.webp)
+```
+
+- 后端把 `management/docs/_assets/` 挂了只读静态目录到 `/api/management/docs-assets/`（经 Vite `/api` 代理）
+- **不要用相对路径**（如 `_assets/x.png`）：文档页面 URL 是 `/management/docs/<slug>`，相对路径会被解析到 `/management/docs/_assets/...` → 404
+
+**图题约定**：`![图 N · 说明](url)` —— alt 文本会被渲染成 `<figcaption>`（渲染器把“整段仅一张带 alt 的图”包为 `<figure>`）。
+
+- 图号 `N` 按正文出现顺序全局递增；子图用 `图 N(a) · …`
+- **不需要图题的图**（如行内小图标）写空 alt `![](url)`，渲染为裸 `<img>`，不生成空图题
+- 每张图在正文里应与解读对应，不要只丢图不说
+
+**资源规范**：WebP / 最长边 ≤1600px / 质量 82 / 单文件 ≤500KB / 单篇 ≤5MB。压缩可用 Pillow：
+
+```bash
+python3 -c "from PIL import Image; Image.open('src.png').convert('RGB').save('dst.webp','WEBP',quality=82)"
+```
+
+**安全约束**：渲染管线保持 `html: false`，不要写原始 `<img>` HTML（会被转义）；图片只能通过 Markdown 图片语法引入。
+
 ## 3. Mermaid 图表
 
 Mermaid 是文档中表达流程、时序、架构的首选方式。完整速查见 `.agents/skills/documentation/references/mermaid-cheatsheet.md`。

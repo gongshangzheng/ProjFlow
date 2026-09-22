@@ -252,11 +252,13 @@ def _normalize_date(value):
 
 @router.get("/docs")
 async def get_docs():
-    """获取文档列表（management/docs/ 递归扫描所有 .md 文件）"""
+    """获取文档列表（management/docs/ 递归扫描所有 .md 文件，跳过 _assets 等下划线资产目录）"""
     if not os.path.isdir(_DOCS_DIR):
         return []
     docs = []
-    for root, _dirs, files in os.walk(_DOCS_DIR):
+    for root, dirs, files in os.walk(_DOCS_DIR):
+        # 下划线前缀目录（如 _assets/）存放资产，不是文档
+        dirs[:] = [d for d in dirs if not d.startswith('_')]
         for f in sorted(files):
             if not f.endswith('.md'):
                 continue
