@@ -113,10 +113,11 @@ ProjFlow/
 │   └── results/             # 评测结果 JSON（.gitignore）
 ├── data/                    # 数据目录
 │   └── papers.db            # SQLite 论文数据库（.gitignore）
-├── scripts/                 # 工具脚本
-│   └── import_papers.py     # 论文导入脚本
-└── docs/                    # 其他文档
+└── scripts/                 # 工具脚本
+    └── import_papers.py     # 论文导入脚本
 ```
+
+> 说明性文档（含 wiki）统一置于 `management/docs/`；仓库根目录不设 `docs/`。
 
 ## 三大模块架构
 
