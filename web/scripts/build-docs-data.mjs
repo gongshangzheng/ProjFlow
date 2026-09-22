@@ -13,8 +13,8 @@
 // frontmatter 只支持本仓库实际用到的 YAML 子集（单行 key: value / 内联数组 / 数字）。
 // 遇到不支持的写法直接报错退出，绝不静默产出缺字段的数据。
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join, relative, resolve, sep } from 'node:path'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -23,6 +23,8 @@ const REPO_ROOT = resolve(WEB_DIR, '..')
 const DOCS_DIR = join(REPO_ROOT, 'management', 'docs')
 const CONFIG_FILE = join(REPO_ROOT, 'server', 'config.py')
 const OUT_FILE = join(WEB_DIR, 'public', 'docs-data.json')
+const ASSETS_SRC = join(DOCS_DIR, '_assets')
+const ASSETS_OUT = join(WEB_DIR, 'public', 'docs-assets')
 
 function fail(message) {
   console.error(`[build-docs-data] ${message}`)
@@ -53,6 +55,29 @@ function walkMarkdown(dir) {
     }
   }
   return found
+}
+
+/** 统计目录下的文件数（忽略点文件，如 .gitkeep）。 */
+function countFiles(dir) {
+  let count = 0
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) count += countFiles(join(dir, entry.name))
+    else if (entry.isFile() && !entry.name.startsWith('.')) count += 1
+  }
+  return count
+}
+
+/**
+ * 把 management/docs/_assets/ 整树复制到 web/public/docs-assets/。
+ * 先清空目标：静态托管产物是「本次构建的完整快照」，残留旧图会让已删除的图仍可访问。
+ * 源目录不存在时跳过（构建照常成功）。
+ */
+function syncAssets() {
+  rmSync(ASSETS_OUT, { recursive: true, force: true })
+  if (!existsSync(ASSETS_SRC)) return 0
+  // 跳过点文件（.gitkeep 等占位文件），与 assetCount 的口径一致
+  cpSync(ASSETS_SRC, ASSETS_OUT, { recursive: true, filter: (src) => !basename(src).startsWith('.') })
+  return countFiles(ASSETS_OUT)
 }
 
 function unquote(value) {
@@ -177,14 +202,20 @@ function main() {
   const orderedDetails = {}
   for (const doc of docs) orderedDetails[doc.slug] = details[doc.slug]
 
+  const assetCount = syncAssets()
+
   mkdirSync(dirname(OUT_FILE), { recursive: true })
   writeFileSync(
     OUT_FILE,
-    JSON.stringify({ generatedAt: new Date().toISOString(), folderOrder, docs, details: orderedDetails }, null, 2) + '\n',
+    JSON.stringify(
+      { generatedAt: new Date().toISOString(), folderOrder, assetCount, docs, details: orderedDetails },
+      null,
+      2,
+    ) + '\n',
     'utf8',
   )
 
-  console.log(`[build-docs-data] ${docs.length} 篇文档 → ${relative(REPO_ROOT, OUT_FILE)}`)
+  console.log(`[build-docs-data] ${docs.length} 篇文档、${assetCount} 个图像资产 → ${relative(REPO_ROOT, OUT_FILE)}`)
 }
 
 main()
