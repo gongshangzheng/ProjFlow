@@ -178,6 +178,25 @@ python3 -c "from PIL import Image; Image.open('src.png').convert('RGB').save('ds
 
 **安全约束**：渲染管线保持 `html: false`，不要写原始 `<img>` HTML（会被转义）；图片只能通过 Markdown 图片语法引入。
 
+### 1.5 公式（LaTeX）
+
+正文支持 KaTeX 渲染：行内 `$...$`、块级 `$$...$$`（契约见 `openspec/specs/docs-page-content/spec.md`）。
+
+```markdown
+质能关系 $E = mc^2$ 成立。
+
+$$
+\mathcal{L}_{total} = \mathcal{L}_{rec} + \lambda \mathcal{L}_{per}
+$$
+```
+
+- 公式后**必须**给符号表与中文解释（符号 / 含义 / 取值），不要只丢公式
+- **不要**写 `\(...\)` 或 `\[...\]`：这是 markdown-it 的转义语法，反斜杠会被吃掉，`\(a\)` 会渲染成 `(a)`
+- **不要**写 `\begin{equation}`：改用 `$$...$$` 块级公式
+- 公式内容首尾不能是空白（`$ x $` 会被当普通文本）；`$` 紧邻数字也不会当公式（`$5 到 $10` 保持字面）
+- **Mermaid 图节点内**用 `$$...$$`（单 `$` 不渲染，是 Mermaid 自身规则）：`A["输入 $$x_t$$"] --> B["损失 $$\mathcal{L}$$"]`
+- 需要保真原式（便于复制/对照论文）时，可额外附代码块保留 LaTeX 源码
+
 ## 3. Mermaid 图表
 
 Mermaid 是文档中表达流程、时序、架构的首选方式。完整速查见 `.agents/skills/documentation/references/mermaid-cheatsheet.md`。
