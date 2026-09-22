@@ -1,9 +1,11 @@
 ---
 name: documentation
 description: |
-  Wiki 文档的内容规范与速查：结构模板、内部链接、图片与图题、LaTeX 公式、Mermaid 图表、写作风格、会议纪要格式。
-  触发场景：(1) 查文档模板与格式约定，(2) 写 Mermaid 图表，(3) 处理内部链接 / 图片图题 / 公式写法，(4) 统一写作风格与标题层级。
-  注：「动笔前的流程」（何时必须开 change、design 先行、审核后动笔）见 doc-writing skill。
+  ProjFlow 文档的写作流程门禁与内容规范（本库唯一的文档写作 skill）。
+  流程门禁：写任何文档正文之前，先判断是否结构级变更、开 OpenSpec change、在 design.md 写清结构与目标读者、经用户审核后才动笔。
+  内容规范：结构模板、内部链接、图片与图题、LaTeX 公式、Mermaid 图表、写作风格、会议纪要格式。
+  触发场景：(1) 要写/新增一篇文档，(2) 文档大改或结构调整，(3) 不确定某次文档改动是否需要开 change，
+           (4) 需要文档落点与登记规则，(5) 查文档模板与格式约定，(6) 处理 Mermaid / 内部链接 / 图片 / 公式 / 风格。
 ---
 
 # 文档写作指南
@@ -11,8 +13,7 @@ description: |
 本 skill 提供 ProjFlow 项目内 Markdown 文档的写作规范与工具速查，覆盖 Wiki 文档、会议纪要、项目 README、技术方案等。
 
 > **与 management skill 的分工**：management skill 负责文档的**CRUD 操作**（`create_doc.py` / `update_doc.py` 等）；本 skill 负责文档**内容怎么写**（结构、Mermaid、链接、图片、公式、风格）。
->
-> **与 doc-writing skill 的分工**：`doc-writing` 是**流程门禁**（什么时候可以动笔、动笔前必须产出什么）；本 skill 是**内容规范**（写出来的东西长什么样）。
+
 
 ## 1. 文档变更的 OpenSpec 双层流程（结构级变更必读）
 
@@ -29,7 +30,12 @@ description: |
 
 ### 1.2 写正文前的硬性顺序
 
-1. 在单篇 Change 的 **design.md** 写明**目标结构**：有哪些章、每章说什么、章内有多少细章与细分节、整体逻辑（读者动线——为什么是这个顺序）
+1. 在单篇 Change 的 **design.md** 写清五件事（缺一不可）：
+   - **目标读者**（自己回顾 / 团队协作 / 外部评审）
+   - **完整章节结构**，到二级标题（有哪些章、每章说什么、章内细分节、整体逻辑即读者动线——为什么是这个顺序）
+   - **每节要表达什么、论证什么、下什么结论**
+   - **与其它文档的引用关系**（谁引用谁、职责边界在哪）
+   - **需要外部调研的知识点**（列出来，不许凭空写）
 2. 用户审核通过该 design
 3. **之后**才能写 / 改正文；实施中按 tasks 勾进度
 
@@ -42,6 +48,8 @@ description: |
 - 图优先 Mermaid，不用 ASCII 字符画
 - 大改完成后：通读一遍 + 顶层树 grep + stale 引用 grep，全绿才提交
 - 文档正文**不放**「术语修正」式警示语（历史归演进记录）
+- **wiki 文档动笔前先登记** `openspec/registry.md`（加/改一行），再写正文；登记动作本身不需要开 change
+- **不编造领域背景/文献**：需要调研的点写进 design 的调研清单，不得凭空下笔
 
 ### 1.4 正文零历史信息
 
@@ -87,6 +95,7 @@ description: |
 - **文件名**：`{slug}.md`，slug 只允许字母、数字、连字符 `-`、下划线 `_`、斜杠 `/`（子目录）。
 - **存放位置**：`management/docs/`（纯 wiki 目录，不混会议纪要/项目/里程碑）。支持子目录，如 `management/docs/architecture/api-design.md`，slug 为 `architecture/api-design`。
 - **注意**：`management/projects/{slug}/notes/` 是任务笔记目录，**不是** wiki 文档目录。通用文档必须放 `management/docs/`。
+- **仓库根目录不设 `docs/`**：说明性文档统一置于 `management/docs/`（`AGENTS.md` 与 `documentation` spec 同款约定）。
 - **frontmatter 必填**：`title`、`author`、`date`、`tags`、`summary`。
 - **frontmatter 可选**：`id`（数字），用于控制文档列表排序。有 `id` 的文档按 `id` 升序排列在前，无 `id` 的按 `date` 降序排列在后。
 
