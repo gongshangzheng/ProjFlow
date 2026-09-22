@@ -64,7 +64,17 @@ cd ProjFlow/web
 npx vite --port 3210
 ```
 
-启动后访问 http://localhost:3210
+启动后访问 http://localhost:3210（开发基路径为 `/`，不需要子路径前缀）
+
+## GitHub Pages
+
+线上站点：<https://gongshangzheng.github.io/ProjFlow/>
+
+- push `main` 后由 `.github/workflows/deploy.yml` 自动构建 `web/` 并发布 `web/dist`。
+- `npm run build` 会自动串联 `prebuild`（生成文档静态数据 `docs-data.json` 与图片资产）与 `postbuild`（产出 `404.html`）。
+- **开发与构建的基路径不同**：`vite.config.js` 里构建时用 `/ProjFlow/`、开发时用 `/`，因此本地开发地址不受影响。
+- **Pages 上只有文档页可用**（无后端）：论文列表 / 评测 / 项目树等依赖 FastAPI 的页面会显示空态。
+  文档正文里的图片走静态资产，可正常显示。
 
 ## 技术栈
 

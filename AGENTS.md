@@ -53,6 +53,28 @@ nohup npx vite --port 3210 --strict-port </dev/null > /tmp/frontend.log 2>&1 & d
 >
 > 建议：新项目选定端口后先 `lsof -i :<新端口>` 确认空闲，再全局搜索替换旧端口号。
 >
+## 部署（GitHub Pages）
+
+线上站点：<https://gongshangzheng.github.io/ProjFlow/>
+
+```text
+push main → .github/workflows/deploy.yml
+  → web/ 下 npm install + npm run build
+      prebuild  build-docs-data.mjs  management/docs/ → web/public/docs-data.json（含 _assets 复制）
+      vite build
+      postbuild copy-404.mjs         dist/index.html → dist/404.html
+  → 上传 web/dist 到 GitHub Pages
+```
+
+关键约定：
+
+1. **基路径条件式**：`web/vite.config.js` 里 `base` 在 `build` 时为 `/ProjFlow/`、开发时为 `/`。
+   因此**本地开发地址仍是 `http://localhost:3210/`**，不会被改成子路径。改仓库名时同步改这一处。
+2. **构建只走 `npm run build`**：直接用 `vite build` 会跳过 pre/post 钩子 → 产物缺 `docs-data.json`/`404.html`。
+3. **文档页在线上读静态数据**（`api/docs.js` 按 `import.meta.env.PROD` 切换）；开发模式仍走 FastAPI。
+   源 Markdown 保持 `/api/management/docs-assets/...` 绝对路径，静态分支在读取时改写到 `/<base>/docs-assets/`。
+4. **线上只有文档页可用**：无后端，论文/评测/项目树等页面显示空态；`404.html` 负责把深链接交给 SPA。
+
 > 📋 **从本库初始化新库后的第一件事**：在新库内执行 openspec change `fork-init-guide`
 > （走 `openspec-apply-change` 流程；tasks 即完整适配清单：端口 / OpenSpec 目录 / 命名 / 数据 / 依赖 / 功能隐藏 / 自检）。
 > 完成后 `openspec archive fork-init-guide`。

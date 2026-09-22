@@ -215,7 +215,8 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  // 基路径随场景：构建/preview 为部署子路径（如 /ProjFlow/），开发为 /
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 })
 
