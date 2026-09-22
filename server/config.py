@@ -37,6 +37,10 @@ SPEEDRUN_DIR = os.path.join(BASE_DIR, "results", "speedrun")
 SPEEDRUN_OUTPUTS_DIR = os.path.join(SPEEDRUN_DIR, "outputs")
 SPEEDRUN_RESULTS_JSON = os.path.join(SPEEDRUN_DIR, "results.json")
 
+# 文档列表中文件夹的先后（未列出的排在已知之后）
+# 上游默认空列表：不内置任何领域目录名；下游库按需覆盖（如 digital-human 用 ['实习复盘', '论文笔记', 'knowledge']）
+DOCS_FOLDER_ORDER = []
+
 # CORS 配置
 CORS_ORIGINS = [
     "http://localhost:3210",
