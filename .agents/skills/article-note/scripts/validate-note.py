@@ -56,8 +56,11 @@ def main():
     missing_sections = [title for title in required_sections if title not in present_titles]
     if missing_sections:
         warnings.append("standard sections missing or intentionally skipped: %s" % ", ".join(missing_sections))
-    if re.search(r"\\\(|\\\[|\\begin\{equation", body):
-        warnings.append("possible raw LaTeX found; ensure formulas are fenced code blocks")
+    # 渲染器支持 $...$ 与 $$...$$；\(...\) / \[...\] 会被 markdown 转义吃掉，属不支持的写法
+    if re.search(r"\\\(|\\\[", body):
+        warnings.append("found \\(...\\) or \\[...\\] delimiters; 本库只支持 $...$ 与 $$...$$")
+    if "\\begin{equation" in body:
+        warnings.append("found \\begin{equation}; 建议改用 $$...$$ 块级公式")
     images = IMAGE_RE.findall(body)
     for index, (alt, url) in enumerate(images, 1):
         if not url.startswith("/api/management/docs-assets/"):
