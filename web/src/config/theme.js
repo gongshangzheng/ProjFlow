@@ -23,6 +23,7 @@ export const ACCENTS = [
   { key: 'amber', label: '琥珀', light: '#d97706', dark: '#fbbf24' },
   { key: 'rose', label: '玫红', light: '#e11d48', dark: '#fb7185' },
   { key: 'violet', label: '紫罗兰', light: '#7c3aed', dark: '#a78bfa' },
+  { key: 'gray', label: '枪灰', light: '#4a4f57', dark: '#a8aeb6' },
 ]
 
 // soft / selected 变量在明暗模式下的透明度（沿用改造前的取值）
