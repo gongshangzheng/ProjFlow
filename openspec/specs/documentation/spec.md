@@ -1,7 +1,9 @@
 # documentation
 
-## Requirements
+## Purpose
 
+定义 ProjFlow wiki 文档体系的权威来源与内容契约：文档登记表作为「新增 / 废弃 / 职责归属」的唯一权威；文档元数据以同名 sidecar json 承载并按固定布局渲染；结构级变更须经单篇 OpenSpec change 且 design 先行；仓库说明性文档统一置于 `management/docs/`。
+## Requirements
 ### Requirement: 文档登记表为唯一权威
 
 系统 SHALL 维护文档登记表（编号 / 标题 / slug / 职责边界 / 单篇 Change），作为文档体系所有「新增 / 废弃 / 职责归属」问题的唯一权威来源。
@@ -56,3 +58,18 @@
 
 - **WHEN** 需要重排一篇文档的章节
 - **THEN** 先在单篇 Change 的 design 写明新旧结构与重映射方案，审核通过后实施，并以「引用闭合核对（悬空 = 0）」作为完成标准
+
+### Requirement: 仓库文档根目录唯一
+
+仓库的说明性文档 SHALL 统一置于 `management/docs/` 下；仓库根目录 MUST NOT 存在 `docs/` 目录。`AGENTS.md` 等结构说明文档 MUST 与实际目录保持一致，不得保留已删除目录的条目。
+
+#### Scenario: 检查仓库顶层目录
+
+- **WHEN** 检查仓库根目录
+- **THEN** 不存在 `docs/` 目录，说明性文档位于 `management/docs/`
+
+#### Scenario: 结构说明与实现一致
+
+- **WHEN** 目录结构发生变化（新增或删除顶层目录）
+- **THEN** `AGENTS.md` 的目录树在同一变更内同步更新，不残留已删除目录的条目
+
