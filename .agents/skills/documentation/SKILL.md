@@ -1,15 +1,18 @@
 ---
 name: documentation
 description: |
-  文档写作指南。用于撰写 Wiki 文档、技术文档、设计文档、会议纪要、报告等 Markdown 内容。
-  触发场景：(1) 创建/修改 Wiki 文档，(2) 在文档中画 Mermaid 图表，(3) 写技术方案/设计文档，(4) 规范文档结构和风格
+  Wiki 文档的内容规范与速查：结构模板、内部链接、图片与图题、LaTeX 公式、Mermaid 图表、写作风格、会议纪要格式。
+  触发场景：(1) 查文档模板与格式约定，(2) 写 Mermaid 图表，(3) 处理内部链接 / 图片图题 / 公式写法，(4) 统一写作风格与标题层级。
+  注：「动笔前的流程」（何时必须开 change、design 先行、审核后动笔）见 doc-writing skill。
 ---
 
 # 文档写作指南
 
 本 skill 提供 ProjFlow 项目内 Markdown 文档的写作规范与工具速查，覆盖 Wiki 文档、会议纪要、项目 README、技术方案等。
 
-> **与 management skill 的分工**：management skill 负责文档的**CRUD 操作**（`create_doc.py` / `update_doc.py` 等）；本 skill 负责文档**内容怎么写**（结构、Mermaid、链接、风格）。
+> **与 management skill 的分工**：management skill 负责文档的**CRUD 操作**（`create_doc.py` / `update_doc.py` 等）；本 skill 负责文档**内容怎么写**（结构、Mermaid、链接、图片、公式、风格）。
+>
+> **与 doc-writing skill 的分工**：`doc-writing` 是**流程门禁**（什么时候可以动笔、动笔前必须产出什么）；本 skill 是**内容规范**（写出来的东西长什么样）。
 
 ## 1. 文档变更的 OpenSpec 双层流程（结构级变更必读）
 
@@ -19,7 +22,7 @@ description: |
 
 | 层 | Change | 管什么 | 何时开 |
 |---|---|---|---|
-| **总 Change** | `docs-system` | 所有 wiki 的**整体**：文档登记表（编号 / 标题 / slug / 职责边界 / 相互关系）、新增或废弃一篇、编号体系、跨文档引用规范 | 文档体系级动作 |
+| **登记表** | `openspec/registry.md` | 所有 wiki 的**整体**：编号 / 标题 / slug / 职责边界 / 单篇 Change、新增或废弃一篇、编号体系、跨文档引用规范。**登记动作 = 直接编辑该表**（无需开 change） | 增删改一行时直接改；只有改登记表的位置/结构/规则本身才开 change |
 | **单篇 Change** | `docs-<slug>`（如 `docs-api-design-conventions`） | **一篇**文档的结构与内容：章节结构、内容重构、大段增删 | 结构级变更 |
 
 **豁免**：内容级小修（错字、更新一个数字、补一小段论证、修一处链接）**不需要 Change**——直接改，但 commit message 必须写明改了什么、为什么。判断标准：**读者需要重新理解文档结构吗？** 需要 → 走 Change；不需要 → 直接改。
@@ -180,7 +183,7 @@ python3 -c "from PIL import Image; Image.open('src.png').convert('RGB').save('ds
 
 ### 1.5 公式（LaTeX）
 
-正文支持 KaTeX 渲染：行内 `$...$`、块级 `$$...$$`（契约见 `openspec/specs/docs-page-content/spec.md`）。
+正文支持 KaTeX 渲染：行内 `$...$`、块级 `$$...$$`（契约见 `openspec/specs/docs-math/spec.md`）。
 
 ```markdown
 质能关系 $E = mc^2$ 成立。
