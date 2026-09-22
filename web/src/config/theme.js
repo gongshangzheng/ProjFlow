@@ -11,7 +11,8 @@
 // 新增一个颜色只需在 ACCENTS 里加一行。
 // ============================================================
 
-export const DEFAULT_ACCENT = 'indigo'
+// 默认强调色：无本地偏好时使用（枪灰）
+export const DEFAULT_ACCENT = 'gray'
 
 // 浅色模式用较深的色值（在白底上对比度足够），深色模式用较亮的变体。
 export const ACCENTS = [

@@ -30,6 +30,20 @@
 
 `APPEND` 在 `violet` 之后，不改变既有项顺序与默认项（`DEFAULT_ACCENT = 'indigo'`）。
 
+### D3: 默认色改为枪灰 + 同步无 JS 兜底色值
+
+`DEFAULT_ACCENT` 由 `'indigo'` 改为 `'gray'`；同时把样式层的「无 JS 兜底」也换成枪灰：
+
+| 位置 | 改前 | 改后 |
+|------|------|------|
+| `variables.scss` `$primary-color` | `#4f46e5` | `#4a4f57` |
+| `variables.scss` `$primary-light` / `$primary-dark` | `#6366f1` / `#4338ca` | `#60646b` / `#41464d`（按 `mix()` 规则手算） |
+| `index.scss` `:root` `--color-primary-soft` / `--color-selected` | 靛蓝 rgba | 枪灰 rgba |
+| `index.scss` dark `--color-primary` / soft / selected | `#818cf8` / 靛蓝 / 蓝 | `#a8aeb6` / 中性 / 中性 |
+
+- 理由：`:root` 的变量在 JS store 执行前就已生效（首屏极短窗口），若不同步会出现「枪灰→靛蓝→枪灰」闪色。
+- 顺带修正：`index.scss` 的 `blockquote { border-left: 4px solid $primary-color }` 用的是**编译期常量**，改强调色时它不跟随（永远靛蓝）。改为 `var(--color-primary)` 后与其它元素一致。
+
 ## Risks / Trade-offs
 
 - [枪灰作主色时选中态不够醒目] → `--color-selected` 用 rgba 叠加，仍有可见底色差；这是「不抢注意力」的预期代价。
