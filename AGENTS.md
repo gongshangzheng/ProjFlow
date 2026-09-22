@@ -74,6 +74,9 @@ push main → .github/workflows/deploy.yml
 3. **文档页在线上读静态数据**（`api/docs.js` 按 `import.meta.env.PROD` 切换）；开发模式仍走 FastAPI。
    源 Markdown 保持 `/api/management/docs-assets/...` 绝对路径，静态分支在读取时改写到 `/<base>/docs-assets/`。
 4. **线上只有文档页可用**：无后端，论文/评测/项目树等页面显示空态；`404.html` 负责把深链接交给 SPA。
+5. **改了文档要 push 才生效**：`management/docs/*.md` 是**构建期**编译进 `web/public/docs-data.json` 的，
+   线上不实时读仓库。所以「改 md → 本地看效果」走 dev（FastAPI 实时读），
+   「改 md → 线上更新」必须 `git push`（并等 CI 跑完，约 1–2 分钟）。
 
 > 📋 **从本库初始化新库后的第一件事**：在新库内执行 openspec change `fork-init-guide`
 > （走 `openspec-apply-change` 流程；tasks 即完整适配清单：端口 / OpenSpec 目录 / 命名 / 数据 / 依赖 / 功能隐藏 / 自检）。
@@ -207,6 +210,15 @@ evaluation/ 目录（JSON 文件）
 3. **type 取值**：feat（新功能）、fix（修复）、refactor（重构）、style（样式）、docs（文档）、chore（杂项）
 4. **禁止提交**：`node_modules/`、`__pycache__/`、`.venv/`、`.env`、`*.db`、`papers/data/`、`papers/cache/`
 5. **跨库传播**：共享脚手架改进在上/下游间的 cherry-pick 双向操作与冲突分类解法，见 `.agents/skills/upstream-sync/SKILL.md`（含实证命令序列）
+
+### 文档（wiki）变更
+
+- **登记表是唯一权威**：`openspec/registry.md`（编号 / slug / 标题 / 职责边界 / 单篇 Change）。
+  新增或废弃一篇文档 → **先改这张表**，再开单篇 Change `docs-<slug>`，design 审核通过后才动笔。
+- **正文位置**：`management/docs/<slug>.md`，元数据在同名 `<slug>.json`（`changelog` / `progress` / `appendix` / `related`）。
+- **结构级变更**（章节增删 / 移动 / 重编号）必须走单篇 change 且 design 先行；
+  **内容级小修**（错字 / 数字 / 单段论证 / 链接）直接改，commit message 说明即可。
+- 详细契约见 `openspec/specs/documentation/spec.md`。
 
 ### 前端开发
 

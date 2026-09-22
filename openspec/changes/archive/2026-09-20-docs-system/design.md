@@ -4,6 +4,9 @@
 
 ## 文档登记表（唯一权威）
 
+> ⚠️ **本表已迁出**：登记表现位于耐久位置 [`openspec/registry.md`](../../../../registry.md)，以那里为准；
+> 下表为 2026-09-20 归档时的快照，仅作历史记录（`promote-docs-registry` change 迁出）。
+
 | 编号 | slug | 标题 | 职责边界（只管什么） | 单篇 Change |
 |---|---|---|---|---|
 | 1 | api-design-conventions | API 设计约定 | server/ 各路由的 API 设计规范（路径 / 响应结构 / 错误处理） | — |
