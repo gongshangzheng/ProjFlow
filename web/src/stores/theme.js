@@ -43,6 +43,7 @@ function applyAccent(accent, mode) {
   root.style.setProperty('--color-primary', a.primary)
   root.style.setProperty('--color-primary-soft', toRgba(a.primary, a.softAlpha))
   root.style.setProperty('--color-selected', toRgba(a.primary, a.selectedAlpha))
+  root.style.setProperty('--color-primary-border', toRgba(a.primary, a.borderAlpha))
   root.setAttribute('data-accent', a.key)
 }
 

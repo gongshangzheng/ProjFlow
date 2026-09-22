@@ -5,7 +5,7 @@
         <template #header>
           <div class="flex-between">
             <div class="flex" style="align-items: center; gap: 16px">
-              <n-avatar round size="large" :style="{ backgroundColor: '#4f46e5' }">
+              <n-avatar round size="large" :style="{ backgroundColor: 'var(--color-primary)' }">
                 {{ member.name?.charAt(0) }}
               </n-avatar>
               <div>

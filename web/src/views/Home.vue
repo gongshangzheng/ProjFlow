@@ -144,7 +144,7 @@ onMounted(async () => {
     color: #fff;
   }
 
-  &.management .module-icon { background: #4f46e5; }
+  &.management .module-icon { background: var(--color-primary); }
   &.papers .module-icon { background: #0ea5e9; }
   &.evaluation .module-icon { background: #f59e0b; }
 

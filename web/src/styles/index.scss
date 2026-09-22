@@ -7,6 +7,7 @@
   --color-elevated: #{$border-light};
   --color-hover: rgba(0, 0, 0, 0.04);
   --color-selected: rgba(74, 79, 87, 0.08);
+  --color-primary-border: rgba(74, 79, 87, 0.27);
   --color-border: #{$border-color};
   --color-border-light: #{$border-light};
   --color-text: #{$text-primary};
@@ -27,6 +28,7 @@
   --color-elevated: #27272a;
   --color-hover: rgba(255, 255, 255, 0.05);
   --color-selected: rgba(168, 174, 182, 0.12);
+  --color-primary-border: rgba(168, 174, 182, 0.3);
   --color-border: #3f3f46;
   --color-border-light: #2a2a2e;
   --color-text: #e4e4e7;

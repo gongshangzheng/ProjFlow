@@ -30,6 +30,8 @@ export const ACCENTS = [
 // soft / selected 变量在明暗模式下的透明度（沿用改造前的取值）
 const SOFT_ALPHA = { light: 0.12, dark: 0.15 }
 const SELECTED_ALPHA = { light: 0.08, dark: 0.12 }
+// 中透明度变体：卡片 hover 边框等需要比 soft 更实、比实色更轻的场合
+const BORDER_ALPHA = { light: 0.27, dark: 0.30 }
 
 function hexToRgb(hex) {
   const raw = String(hex).replace('#', '')
@@ -70,6 +72,7 @@ export function accentFor(key, isDark) {
     primary: accent[mode],
     softAlpha: SOFT_ALPHA[mode],
     selectedAlpha: SELECTED_ALPHA[mode],
+    borderAlpha: BORDER_ALPHA[mode],
   }
 }
 
