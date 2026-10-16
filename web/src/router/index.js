@@ -15,7 +15,7 @@ const routes = [
       // 项目管理
       {
         path: 'management',
-        redirect: '/management/projects',
+        redirect: '/management/tasks',
       },
       {
         path: 'management/projects',
@@ -221,6 +221,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  // 项目树暂时停用；兼容收藏及旧文档中的任务链接。
+  if (to.path === '/management/projects' || to.path.startsWith('/management/projects/')) {
+    next({ path: '/management/tasks', replace: true })
+    return
+  }
   document.title = to.meta.title
     ? `${to.meta.title} - ProjFlow`
     : 'ProjFlow'

@@ -46,6 +46,7 @@
 // ============================================================
 
 export const HIDDEN_KEYS = [
+  '/management/projects', // 项目树暂时停用，工作跟踪使用 OpenSpec
   // 示例：
   // '/management/reports',   // 隐藏「报告」菜单项
   // 'reports:daily',         // 仅隐藏日报 tab（周报/月报保留）

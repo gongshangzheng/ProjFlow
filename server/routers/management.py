@@ -16,6 +16,8 @@ from server.parsers.projects_parser import (
 )
 
 router = APIRouter(prefix="/api/management", tags=["management"])
+# 项目树暂时停用：保留实现供恢复，不挂载到应用；看板仍使用共享数据。
+projects_router = APIRouter(prefix="/api/management", tags=["projects"])
 
 # 日期/作者参数校验（防止路径遍历与非法文件名）
 _DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
@@ -352,12 +354,13 @@ async def get_doc_detail(slug: str):
 # ========== 项目树 ==========
 
 @router.get("/projects")
+# 任务看板也依赖项目列表，保留此共享接口。
 async def get_projects():
     """获取所有项目列表"""
     return list_projects()
 
 
-@router.get("/projects/{slug}")
+@projects_router.get("/projects/{slug}")
 async def get_project_detail(slug: str):
     """获取项目 README 元信息 + 正文"""
     project = get_project(slug)
@@ -366,7 +369,7 @@ async def get_project_detail(slug: str):
     return project
 
 
-@router.get("/projects/{slug}/tasks")
+@projects_router.get("/projects/{slug}/tasks")
 async def get_project_tasks_route(slug: str):
     """获取项目任务树"""
     tree = get_project_tasks(slug)
@@ -375,7 +378,7 @@ async def get_project_tasks_route(slug: str):
     return tree
 
 
-@router.get("/projects/{slug}/notes/{note_path:path}")
+@projects_router.get("/projects/{slug}/notes/{note_path:path}")
 async def get_task_note_route(slug: str, note_path: str):
     """获取任务笔记 markdown"""
     content = get_task_note(slug, note_path)

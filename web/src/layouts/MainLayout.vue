@@ -270,7 +270,7 @@ function onBreadcrumbClick(item) {
 
 // 模块 -> 模块首页路径（让 breadcrumb 的模块项可点回退）
 const MODULE_PATH = {
-  management: '/management/projects',
+  management: '/management/tasks',
   papers: '/papers/list',
   datasets: '/datasets',
   evaluation: '/evaluation/run',
