@@ -41,7 +41,10 @@ bash $SD/preflight.sh --gpu-index 0 --json .run/preflight.json   # 顺带落盘�
 bash $SD/remote_run.sh --gpu-index 0 --max-cpu-pct 350 --max-rss-mb 24000 --timeout-s 3600 \
   -- python3 scripts/<your_task>.py --flag
 
-# ③ 跑之前审代码：静态扫描 + 降规模冒烟（峰值 RSS 外推）
+# ③ 环境核验（跑之前）：远端跑的是不是评审过的那份代码 + 那个环境
+bash $SD/env_check.sh --env <name> --expect-commit <sha> --json results/<topic>/<run-id>/env.json
+
+# ④ 跑之前审代码：静态扫描 + 降规模冒烟（峰值 RSS 外推）
 python3 $SD/code_audit.py audit scripts/<your_task>.py
 python3 $SD/code_audit.py smoke --cap-mb 2000 -- python3 scripts/<your_task>.py --frames {n}
 ```
