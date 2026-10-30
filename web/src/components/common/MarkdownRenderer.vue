@@ -209,6 +209,18 @@ async function renderMermaid() {
       theme: themeStore.isDark ? 'dark' : 'default',
       securityLevel: 'loose',
       fontFamily: 'system-ui, sans-serif',
+      // 深色下 mermaid 自带的边标签底/字色是 #585858 上的 #ccc（4.4:1），对齐站点令牌
+      themeVariables: themeStore.isDark
+        ? {
+          background: '#1f1f23',
+          mainBkg: '#27272a',
+          primaryColor: '#27272a',
+          primaryTextColor: '#e4e4e7',
+          textColor: '#e4e4e7',
+          lineColor: '#71717a',
+          edgeLabelBackground: '#1f1f23',
+        }
+        : {},
     })
     await mermaid.run({ nodes: Array.from(nodes) })
   } catch (e) {

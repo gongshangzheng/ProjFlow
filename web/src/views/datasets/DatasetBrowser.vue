@@ -3,11 +3,18 @@
     <!-- L1: 数据集卡片列表 -->
     <n-card v-if="!currentDataset" title="数据集" size="small">
       <template #header-extra>
-        <n-button size="tiny" quaternary @click="loadDatasets">刷新</n-button>
+        <n-button size="small" quaternary @click="loadDatasets">刷新</n-button>
       </template>
       <n-spin :show="loading">
         <div v-if="datasets.length" class="ds-grid">
-          <div v-for="d in datasets" :key="d.id" class="ds-card" @click="openDataset(d)">
+          <div
+            v-for="d in datasets"
+            :key="d.id"
+            class="ds-card"
+            v-clickable
+            :aria-label="`打开数据集：${d.name}`"
+            @click="openDataset(d)"
+          >
             <n-icon size="28" color="#eab308"><folder-outline /></n-icon>
             <div class="ds-name">{{ d.name }}</div>
             <div class="ds-meta">{{ d.subdirs }} 子目录 · {{ d.files }} 文件</div>
@@ -37,17 +44,24 @@
       </template>
       <template #header-extra>
         <span class="total-hint">共 {{ browseData.total }} 项</span>
-        <n-button size="tiny" quaternary style="margin-left: 8px" @click="loadBrowse">刷新</n-button>
+        <n-button size="small" quaternary style="margin-left: 8px" @click="loadBrowse">刷新</n-button>
       </template>
 
       <n-spin :show="browsing">
         <div v-if="browseData.items.length" class="browse-grid">
-          <div v-for="item in browseData.items" :key="item.path" class="browse-item" @click="openItem(item)">
+          <div
+            v-for="item in browseData.items"
+            :key="item.path"
+            class="browse-item"
+            v-clickable
+            :aria-label="`${item.is_dir ? '打开目录' : '预览文件'}：${item.name}`"
+            @click="openItem(item)"
+          >
             <div class="item-thumb">
               <n-icon v-if="item.is_dir" size="30" color="#eab308"><folder-outline /></n-icon>
-              <img v-else-if="item.is_image" :src="fileUrl(item.path)" class="item-cover" loading="lazy" />
+              <img v-else-if="item.is_image" :src="fileUrl(item.path)" class="item-cover" :alt="item.name" loading="lazy" />
               <template v-else-if="item.is_video">
-                <img :src="thumbUrl(item.path)" class="item-cover" loading="lazy" @error="onThumbError" />
+                <img :src="thumbUrl(item.path)" class="item-cover" :alt="`${item.name} 的视频封面`" loading="lazy" @error="onThumbError" />
                 <span class="play-overlay">▶</span>
               </template>
               <n-icon v-else size="26" color="#71717a"><document-outline /></n-icon>
@@ -75,6 +89,7 @@
       <img
         v-if="previewItem?.is_image"
         :src="fileUrl(previewItem.path)"
+        :alt="previewItem.name"
         style="max-width: 100%; max-height: 70vh; display: block; margin: 0 auto"
       />
       <video
@@ -192,14 +207,14 @@ onMounted(loadDatasets)
   gap: 12px;
 }
 .ds-card {
+  // 外层已是 n-card：这一层是内嵌表面，不要再画一张卡片（border + 白底 + 阴影）
   padding: 16px 12px;
-  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--color-card);
+  background: var(--color-elevated);
   cursor: pointer;
   text-align: center;
-  transition: all 0.15s;
-  &:hover { border-color: var(--color-primary); background: var(--color-hover); }
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  &:hover { background: var(--color-hover); }
   .ds-name { margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--color-text); word-break: break-all; }
   .ds-meta { margin-top: 4px; font-size: 11px; color: var(--color-text-dim); }
   .ds-symlink { margin-top: 2px; font-size: 10px; font-style: italic; color: var(--color-text-dim); }

@@ -3,7 +3,7 @@
     <n-card size="small">
       <template #header>
         <div class="flex-between">
-          <h3>评测结果</h3>
+          <h2 class="card-title">评测结果</h2>
           <n-space align="center">
             <n-select v-model:value="filters.model" :options="modelOptions" placeholder="全部模型" clearable size="small" style="width: 160px" />
             <n-select v-model:value="filters.dataset" :options="datasetOptions" placeholder="全部数据集" clearable size="small" style="width: 160px" />
@@ -16,7 +16,7 @@
 
           <n-divider />
 
-          <h4>模型对比图表</h4>
+          <h3>模型对比图表</h3>
           <v-chart v-if="chartOption" class="result-chart" :option="chartOption" autoresize />
         </template>
         <EmptyState v-else description="暂无评测结果，可在评测运行页面启动评测" />
@@ -114,4 +114,5 @@ onMounted(async () => {
 
 <style scoped>
 .result-chart { height: 400px; width: 100%; }
+.card-title { margin: 0; font-size: 16px; font-weight: 600; }
 </style>

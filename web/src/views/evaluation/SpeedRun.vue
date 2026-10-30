@@ -21,15 +21,21 @@
         <n-tag size="small" :type="status.running ? 'info' : 'success'" :bordered="false">
           {{ status.running ? `运行中 · 已出 ${status.results_count} 条` : `共 ${filteredResults.length} 条` }}
         </n-tag>
-        <n-button size="tiny" quaternary style="margin-left: 8px" @click="loadAll">刷新</n-button>
+        <n-button size="small" quaternary style="margin-left: 8px" @click="loadAll">刷新</n-button>
       </template>
 
       <n-spin :show="loading">
-        <n-grid v-if="pagedResults.length" cols="3 600:2 900:3 1200:4" :x-gap="12" :y-gap="12" responsive="screen">
+        <n-grid v-if="pagedResults.length" cols="1 480:2 900:3 1200:4" :x-gap="12" :y-gap="12" responsive="screen">
           <n-grid-item v-for="r in pagedResults" :key="r.id">
-            <div class="video-card" @click="playVideo(r)">
+            <div class="video-card" v-clickable :aria-label="`播放 ${r.video_name || r.id} 的评测视频`" @click="playVideo(r)">
               <div class="thumb">
-                <img v-if="r.cover_image" :src="getSpeedrunOutputUrl(r.cover_image)" class="cover-img" loading="lazy" />
+                <img
+                  v-if="r.cover_image"
+                  :src="getSpeedrunOutputUrl(r.cover_image)"
+                  class="cover-img"
+                  :alt="`${r.video_name || r.id} 的封面帧`"
+                  loading="lazy"
+                />
                 <n-icon v-else size="36"><play-circle-outline /></n-icon>
                 <span class="play-overlay">▶</span>
                 <span v-if="r.correct === true" class="badge correct">✓</span>
@@ -138,9 +144,11 @@ async function loadAll() {
 }
 
 let pollTimer = null
+// 页面不可见时跳过这一轮：后台标签页不必继续打接口
 function startPollingIfRunning() {
   if (pollTimer) return
   pollTimer = setInterval(async () => {
+    if (document.hidden) return
     try {
       const st = await getSpeedrunStatus()
       status.value = st
@@ -169,13 +177,13 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer) })
 .page-title { font-size: 15px; font-weight: 600; }
 
 .video-card {
-  border: 1px solid var(--color-border);
+  // 外层已是 n-card：用内嵌表面 + 圆角，不再叠一张带边框的卡片
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  background: var(--color-card);
-  transition: border-color 0.15s;
-  &:hover { border-color: var(--color-primary); }
+  background: var(--color-elevated);
+  transition: background-color 0.15s;
+  &:hover { background: var(--color-hover); }
 }
 
 .thumb {
@@ -197,10 +205,11 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer) })
     position: absolute; top: 6px; left: 8px;
     width: 22px; height: 22px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
+    // 白字需 ≥4.5:1：原 #22c55e(2.28) / #ef4444(3.76) 不达标
     color: #fff; font-size: 12px;
-    &.correct { background: #22c55e; }
-    &.wrong { background: #ef4444; }
-    &.na { background: #71717a; }
+    &.correct { background: #15803d; }
+    &.wrong { background: #b91c1c; }
+    &.na { background: #52525b; }
   }
 }
 
@@ -216,6 +225,6 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer) })
     em { font-style: normal; color: var(--color-text-dim); margin-left: 4px; font-variant-numeric: tabular-nums; }
   }
   .stats { color: var(--color-text-dim); font-variant-numeric: tabular-nums; }
-  .video-name { color: var(--color-text-dim); font-style: italic; font-size: 10px; }
+  .video-name { color: var(--color-text-dim); font-style: italic; font-size: 11px; }
 }
 </style>

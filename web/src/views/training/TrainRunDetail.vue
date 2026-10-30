@@ -4,7 +4,7 @@
       <template #header>
         <n-space align="center" size="small">
           <n-button size="small" quaternary @click="$router.push('/training/results')">← 返回</n-button>
-          <h3>{{ run?.id || '运行详情' }}</h3>
+          <h2 class="card-title">{{ run?.id || '运行详情' }}</h2>
           <n-tag v-if="run" :type="statusType" size="small" :bordered="false">{{ run.status }}</n-tag>
           <n-tag v-if="isRunning" type="info" size="small" :bordered="false">实时刷新中…</n-tag>
         </n-space>
@@ -71,7 +71,7 @@
       <div class="vis-row">
         <button class="vis-nav" :disabled="(visIndex[group.epoch] || 0) === 0" @click="switchVis(group, -1)">◀</button>
         <div v-if="currentSample(group)" class="vis-main">
-          <img :src="getVisSampleUrl(currentSample(group).url)" class="vis-img" loading="lazy" />
+          <img :src="getVisSampleUrl(currentSample(group).url)" class="vis-img" :alt="`epoch ${group.epoch} 的可视化样本 ${(visIndex[group.epoch] || 0) + 1}`" loading="lazy" />
           <div class="vis-info">
             <span v-if="currentSample(group).correct != null" :class="currentSample(group).correct ? 'vis-ok' : 'vis-err'">
               {{ currentSample(group).correct ? 'OK' : 'WRONG' }}
@@ -91,9 +91,11 @@
           :key="s.url"
           class="vis-thumb"
           :class="{ active: i === (visIndex[group.epoch] || 0) }"
+          v-clickable
+          :aria-label="`查看样本 ${i + 1}`"
           @click="visIndex[group.epoch] = i"
         >
-          <img :src="getVisSampleUrl(s.url)" loading="lazy" />
+          <img :src="getVisSampleUrl(s.url)" :alt="`样本 ${i + 1} 缩略图`" loading="lazy" />
         </div>
       </div>
     </n-card>
@@ -240,7 +242,7 @@ onUnmounted(stopPoll)
 <style scoped lang="scss">
 .run-detail { padding: 4px 8px; }
 .mt { margin-top: 12px; }
-h3 { margin: 0; font-size: 15px; font-weight: 600; }
+h2.card-title { margin: 0; font-size: 15px; font-weight: 600; }
 
 .cp-block { margin-top: 12px; }
 .block-title { font-size: 12px; font-weight: 600; color: var(--color-text-dim); margin-bottom: 6px; }
@@ -261,12 +263,12 @@ h3 { margin: 0; font-size: 15px; font-weight: 600; }
 .vis-img { max-width: 100%; max-height: 300px; border-radius: 6px; display: block; margin: 0 auto 8px; }
 .vis-info {
   font-size: 12px; display: flex; justify-content: center; align-items: center; gap: 12px;
-  .vis-ok { color: #22c55e; font-weight: 600; }
-  .vis-err { color: #ef4444; font-weight: 600; }
+  .vis-ok { color: #047857; font-weight: 600; }
+  .vis-err { color: #b91c1c; font-weight: 600; }
   .vis-dim { color: var(--color-text-dim); }
   .vis-idx { color: var(--color-text-dim); margin-left: auto; font-variant-numeric: tabular-nums; }
 }
-.vis-all-ok { color: #22c55e; }
+.vis-all-ok { color: #047857; }
 .vis-count { color: var(--color-text-dim); font-size: 12px; }
 .vis-thumbs { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; }
 .vis-thumb {

@@ -14,6 +14,8 @@
             <a
               v-if="item.type === 'folder'"
               class="doc-sidebar-folder"
+              v-clickable
+              :aria-expanded="item.expanded ? 'true' : 'false'"
               :style="{ paddingLeft: 10 + item.depth * 14 + 'px' }"
               @click="toggleFolder(item.path)"
             >
@@ -24,6 +26,8 @@
               v-else
               class="doc-sidebar-link"
               :class="{ active: currentSlug === item.slug }"
+              :href="router.resolve(`/management/docs/${item.slug}`).href"
+              :aria-current="currentSlug === item.slug ? 'page' : undefined"
               :style="{ paddingLeft: 10 + item.depth * 14 + 'px' }"
               @click.prevent="navigateTo(item.slug)"
             >
@@ -71,8 +75,8 @@
             </div>
             <p v-if="currentDoc.summary" class="doc-summary">{{ currentDoc.summary }}</p>
             <div v-if="hasSidecarUI" class="doc-side-btns">
-              <n-button v-if="sidecar?.changelog?.length" size="tiny" secondary @click="showChangelog = true">演进记录</n-button>
-              <n-button v-if="sidecar?.progress" size="tiny" secondary @click="showProgress = true">进度</n-button>
+              <n-button v-if="sidecar?.changelog?.length" size="small" secondary @click="showChangelog = true">演进记录</n-button>
+              <n-button v-if="sidecar?.progress" size="small" secondary @click="showProgress = true">进度</n-button>
             </div>
           </header>
           <div class="doc-body">
@@ -399,11 +403,14 @@ watch(currentSlug, (slug) => {
   justify-content: center;
   background: none;
   border: none;
-  padding: 3px;
+  // 触控目标下限 24x24（SC 2.5.8）
+  min-width: 24px;
+  min-height: 24px;
+  padding: 4px;
   cursor: pointer;
   color: var(--color-text-dim);
   border-radius: 4px;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 
   &:hover {
     background: var(--color-hover);
@@ -432,7 +439,7 @@ watch(currentSlug, (slug) => {
   padding: 6px 0;
   cursor: pointer;
   color: var(--color-text-dim);
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 
   &:hover {
     background: var(--color-hover);
@@ -471,7 +478,7 @@ watch(currentSlug, (slug) => {
   line-height: 1.4;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
   text-decoration: none;
   margin-bottom: 2px;
 
@@ -498,7 +505,7 @@ watch(currentSlug, (slug) => {
   line-height: 1.4;
   color: var(--color-text-dim);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
   text-decoration: none;
   margin-bottom: 2px;
   user-select: none;
@@ -685,7 +692,7 @@ watch(currentSlug, (slug) => {
   line-height: 1.4;
   color: var(--color-text-dim);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
   text-decoration: none;
 
   &:hover {

@@ -17,7 +17,7 @@
     <n-card size="small" class="curve-card">
       <template #header>
         <div class="flex-between">
-          <h3>训练曲线</h3>
+          <h2 class="card-title">训练曲线</h2>
           <span class="hint">{{ curveTitle || '选择下方一条 run 查看其 loss/指标曲线' }}</span>
         </div>
       </template>
@@ -112,6 +112,7 @@ async function refreshCheckpoints() {
 function startPolling() {
   if (pollTimer) return
   pollTimer = setInterval(async () => {
+    if (document.hidden) return
     const res = await getTrainRuns().catch(() => null)
     if (res?.runs) {
       runs.value = sortRuns(res.runs)
