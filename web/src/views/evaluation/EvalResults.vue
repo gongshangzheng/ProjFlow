@@ -12,7 +12,7 @@
       </template>
       <n-spin :show="loading">
         <template v-if="results.length">
-          <n-data-table :columns="columns" :data="filteredResults" :bordered="false" size="small" striped />
+          <n-data-table :scroll-x="720" :columns="columns" :data="filteredResults" :bordered="false" size="small" striped />
 
           <n-divider />
 

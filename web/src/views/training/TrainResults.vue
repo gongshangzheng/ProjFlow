@@ -30,7 +30,7 @@
     <!-- 训练 run 列表 -->
     <n-card size="small" title="训练 run 列表" style="margin-top: 12px">
       <n-spin :show="loading">
-        <n-data-table v-if="filteredRuns.length" :columns="runColumns" :data="filteredRuns" :bordered="false" size="small" striped />
+        <n-data-table :scroll-x="720" v-if="filteredRuns.length" :columns="runColumns" :data="filteredRuns" :bordered="false" size="small" striped />
         <EmptyState v-else description="暂无训练 run。在「训练运行」页启动训练后，run 列表 + loss 曲线在此。" />
       </n-spin>
     </n-card>
@@ -38,7 +38,7 @@
     <!-- checkpoint 文件列表 -->
     <n-card size="small" title="checkpoint 文件（trained .pth）" style="margin-top: 12px">
       <n-spin :show="cpLoading">
-        <n-data-table v-if="checkpoints.length" :columns="cpColumns" :data="checkpoints" :bordered="false" size="small" striped />
+        <n-data-table :scroll-x="720" v-if="checkpoints.length" :columns="cpColumns" :data="checkpoints" :bordered="false" size="small" striped />
         <EmptyState v-else description="暂无 trained checkpoint。训练产物在 results/training/checkpoints/。" />
       </n-spin>
     </n-card>
