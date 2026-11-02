@@ -1,0 +1,13 @@
+{
+  "id": "mock-mini",
+  "name": "Mock Mini (3 条)",
+  "provider": "ProjFlow",
+  "type": "qa",
+  "size": 3,
+  "description": "演示用 3 条 QA 数据",
+  "items": [
+    { "input": "1+1=", "expected": "2" },
+    { "input": "中国的首都是", "expected": "北京" },
+    { "input": "水的化学式", "expected": "H2O" }
+  ]
+}

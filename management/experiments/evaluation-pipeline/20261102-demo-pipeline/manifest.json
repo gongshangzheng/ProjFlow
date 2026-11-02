@@ -1,0 +1,43 @@
+{
+  "evidence": {
+    "实验类型": "正确性 / 一致性（管道验证）",
+    "baseline 数值来源": "evaluation/results/demo-pipeline_mock-chat_mock-mini.json 首次运行",
+    "可辨识性": "两次独立运行 accuracy 均为 0.93（固定值注入→稳定测回），复现噪声为 0",
+    "样本量": "n=2 次运行 × 3 条 QA；低于质量结论门槛，只算管道验证",
+    "失败边界": "无真实模型端点；延迟指标未采集（脚本 TODO 未实现）；图片为纯色占位",
+    "结论上界": "仅支持「链路可运行、可复现、约定一致」，不支持任何模型质量或性能结论"
+  },
+  "metrics": [
+    {
+      "name": "accuracy",
+      "unit": "0–1",
+      "baseline": "0.93",
+      "result": "0.93",
+      "delta": "0",
+      "sample_size": "2 次运行 × 3 条",
+      "source": "evaluation/results/demo-pipeline_mock-chat_mock-mini.json",
+      "limitation": "mock 固定值，不衡量真实模型能力"
+    }
+  ],
+  "cases": [
+    {
+      "id": "run1",
+      "kind": "image",
+      "src": "assets/33ff92fef73fbb5c35ac35b62aaca46bdc0426c83514e8e71fc1048e12d354f3.png",
+      "source_run": "demo-pipeline-20261102a",
+      "input": "demo-pipeline × mock-chat × mock-mini",
+      "selection_reason": "首次运行产物占位图（蓝）",
+      "sha256": "33ff92fef73fbb5c35ac35b62aaca46bdc0426c83514e8e71fc1048e12d354f3"
+    },
+    {
+      "id": "run2",
+      "kind": "image",
+      "src": "assets/907d7af6ef040ef5e6865b0366b2dc155272fe47ca36d71ad6f9668f55e9dcfb.png",
+      "source_run": "demo-pipeline-20261102a",
+      "input": "同配置重复运行",
+      "selection_reason": "第二次运行产物占位图（绿），验证复现",
+      "sha256": "907d7af6ef040ef5e6865b0366b2dc155272fe47ca36d71ad6f9668f55e9dcfb"
+    }
+  ],
+  "diagnostics": []
+}

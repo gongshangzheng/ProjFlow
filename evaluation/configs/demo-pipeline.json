@@ -1,0 +1,7 @@
+{
+  "id": "demo-pipeline",
+  "name": "演示管道验证",
+  "models": ["mock-chat"],
+  "datasets": ["mock-mini"],
+  "metrics": { "accuracy": true, "latency_ms": true }
+}

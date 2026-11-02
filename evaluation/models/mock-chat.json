@@ -1,0 +1,10 @@
+{
+  "id": "mock-chat",
+  "name": "Mock Chat (演示)",
+  "provider": "ProjFlow",
+  "type": "chat",
+  "endpoint": "internal://mock",
+  "parameters": { "model": "mock-chat", "temperature": 0, "max_tokens": 64 },
+  "description": "演示用 mock 模型：返回固定文本，用于管道验证",
+  "enabled": true
+}
