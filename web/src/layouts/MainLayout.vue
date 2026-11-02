@@ -195,6 +195,7 @@ const menuOptions = [
       { label: '里程碑', key: '/management/milestones', icon: renderIcon(FlagOutline) },
       { label: '会议纪要', key: '/management/meetings', icon: renderIcon(ChatbubblesOutline) },
       { label: '文档', key: '/management/docs', icon: renderIcon(BookOutline) },
+      { label: '实验报告', key: '/management/experiments', icon: renderIcon(FlaskOutline) },
     ],
   },
   {
@@ -250,7 +251,7 @@ const activeKey = computed(() => {
   const allKeys = [
     '/', '/management/projects', '/management/team',
     '/management/tasks', '/management/milestones',
-    '/management/meetings', '/management/docs', '/papers/list', '/papers/config',
+    '/management/meetings', '/management/docs', '/management/experiments', '/papers/list', '/papers/config',
     '/datasets',
     '/evaluation/run', '/evaluation/speedrun', '/evaluation/results', '/evaluation/outputs', '/evaluation/models', '/evaluation/datasets', '/evaluation/configs',
     '/training/run', '/training/results', '/training/models', '/training/datasets', '/training/configs',
