@@ -25,7 +25,7 @@
       </template>
 
       <n-spin :show="loading">
-        <n-grid v-if="pagedResults.length" cols="1 480:2 900:3 1200:4" :x-gap="12" :y-gap="12" responsive="screen">
+        <n-grid v-if="pagedResults.length" cols="1 s:2 m:3 l:4" :x-gap="12" :y-gap="12" responsive="screen">
           <n-grid-item v-for="r in pagedResults" :key="r.id">
             <div class="video-card" v-clickable :aria-label="`播放 ${r.video_name || r.id} 的评测视频`" @click="playVideo(r)">
               <div class="thumb">
