@@ -125,6 +125,7 @@ ProjFlow/
 │   ├── daily/               # 日报
 │   ├── weekly/              # 周报
 │   ├── monthly/             # 月报
+│   ├── experiments/         # 实验报告（experiment skill 生成，只读 API 暴露）
 │   └── docs/                # 任务、里程碑、会议纪要
 ├── papers/                  # 论文模块
 │   ├── config/              # 数据源配置
