@@ -80,72 +80,79 @@
           </n-alert>
         </header>
 
-        <div class="detail-body">
-          <MarkdownRenderer :content="detail.content" />
-        </div>
+        <div class="detail-article">
+          <!-- 正文：面向读者的文章；附录默认折叠 -->
+          <MarkdownRenderer :content="reportParts.narrative" />
 
-        <!-- 指标表 -->
-        <section v-if="metricTables.length" class="metrics-section">
-          <h2>指标结果</h2>
-          <div v-for="t in metricTables" :key="t.title" class="metric-table">
-            <h3 v-if="t.title">{{ t.title }}</h3>
-            <n-data-table
-              :columns="dynamicColumns(t.columns)" :data="tableRows(t.rows)"
-              :bordered="false" size="small" striped :scroll-x="560"
-            />
-          </div>
-        </section>
+          <details v-if="reportParts.hasAppendix" class="foldable">
+            <summary>附录：配置与完整数据<span class="fold-hint">精确配置 · 完整指标 · 来源与核查</span></summary>
+            <MarkdownRenderer :content="reportParts.appendix" />
+          </details>
 
-        <!-- 趋势图 -->
-        <section v-if="hasSeries" class="chart-section">
-          <h2>趋势</h2>
-          <v-chart class="trend-chart" :option="chartOption" autoresize :aria-label="'指标趋势图'" role="img" />
-        </section>
+          <!-- 结构化技术指标（manifest 指标含局限 / 趋势 / 表格）：默认折叠，不铺满正文 -->
+          <details v-if="hasStructuredMetrics" class="foldable">
+            <summary>指标与趋势（机器可读）<span class="fold-hint">evidence · metrics.json · cases</span></summary>
 
-        <!-- manifest 指标条目（含局限） -->
-        <section v-if="manifestMetrics.length" class="manifest-metrics">
-          <h2>指标说明</h2>
-          <n-data-table
-            :columns="manifestColumns" :data="manifestMetrics"
-            :bordered="false" size="small" striped :scroll-x="720"
-          />
-        </section>
+            <section v-if="metricTables.length" class="metrics-section">
+              <div v-for="t in metricTables" :key="t.title" class="metric-table">
+                <h3 v-if="t.title">{{ t.title }}</h3>
+                <n-data-table
+                  :columns="dynamicColumns(t.columns)" :data="tableRows(t.rows)"
+                  :bordered="false" size="small" striped :scroll-x="560"
+                />
+              </div>
+            </section>
 
-        <!-- 案例对比：原始像素不缩放，并排 / 交替 -->
-        <section v-if="cases.length" class="cases-section">
-          <h2>案例对比</h2>
-          <div class="cases-toolbar">
-            <n-radio-group v-model:value="compareMode" size="small" name="compare-mode">
-              <n-radio-button value="side" label="并排" />
-              <n-radio-button value="toggle" label="交替" />
-            </n-radio-group>
-            <n-radio-group v-if="compareMode === 'toggle' && cases.length > 1" v-model:value="toggleIndex" size="small" name="case-pick">
-              <n-radio-button v-for="(c, i) in cases" :key="c.id" :value="i" :label="c.id" />
-            </n-radio-group>
-          </div>
+            <section v-if="hasSeries" class="chart-section">
+              <h3>趋势</h3>
+              <v-chart class="trend-chart" :option="chartOption" autoresize aria-label="指标趋势图" role="img" />
+            </section>
 
-          <div v-if="compareMode === 'side'" class="cases-grid">
-            <figure v-for="c in cases" :key="c.id" class="case-fig">
+            <section v-if="manifestMetrics.length" class="manifest-metrics">
+              <h3>指标说明（含局限）</h3>
+              <n-data-table
+                :columns="manifestColumns" :data="manifestMetrics"
+                :bordered="false" size="small" striped :scroll-x="720"
+              />
+            </section>
+          </details>
+
+          <!-- 案例对比：正文已引用的不重复铺满；这里只补未引用的 -->
+          <section v-if="additionalCases.length" class="cases-section">
+            <h2>案例对比</h2>
+            <div class="cases-toolbar">
+              <n-radio-group v-model:value="compareMode" size="small" name="compare-mode">
+                <n-radio-button value="side" label="并排" />
+                <n-radio-button value="toggle" label="交替" />
+              </n-radio-group>
+              <n-radio-group v-if="compareMode === 'toggle' && additionalCases.length > 1" v-model:value="toggleIndex" size="small" name="case-pick">
+                <n-radio-button v-for="(c, i) in additionalCases" :key="c.id" :value="i" :label="c.id" />
+              </n-radio-group>
+            </div>
+
+            <div v-if="compareMode === 'side'" class="cases-grid">
+              <figure v-for="c in additionalCases" :key="c.id" class="case-fig">
+                <div class="case-img-wrap">
+                  <img :src="assetUrl(c)" :alt="`${c.id}：${c.selection_reason}`" loading="lazy" />
+                </div>
+                <figcaption>
+                  <strong>{{ c.id }}</strong> · {{ c.input }}
+                  <span class="case-reason">（{{ c.selection_reason }}）</span>
+                </figcaption>
+              </figure>
+            </div>
+
+            <figure v-else class="case-fig case-toggle">
               <div class="case-img-wrap">
-                <img :src="assetUrl(c)" :alt="`${c.id}：${c.selection_reason}`" loading="lazy" />
+                <img :src="assetUrl(additionalCases[toggleIndex])" :alt="`${additionalCases[toggleIndex].id}：${additionalCases[toggleIndex].selection_reason}`" />
               </div>
               <figcaption>
-                <strong>{{ c.id }}</strong> · {{ c.input }}
-                <span class="case-reason">（{{ c.selection_reason }}）</span>
+                <strong>{{ additionalCases[toggleIndex].id }}</strong> · {{ additionalCases[toggleIndex].input }}
+                <span class="case-reason">（{{ additionalCases[toggleIndex].selection_reason }}）</span>
               </figcaption>
             </figure>
-          </div>
-
-          <figure v-else class="case-fig case-toggle">
-            <div class="case-img-wrap">
-              <img :src="assetUrl(cases[toggleIndex])" :alt="`${cases[toggleIndex].id}：${cases[toggleIndex].selection_reason}`" />
-            </div>
-            <figcaption>
-              <strong>{{ cases[toggleIndex].id }}</strong> · {{ cases[toggleIndex].input }}
-              <span class="case-reason">（{{ cases[toggleIndex].selection_reason }}）</span>
-            </figcaption>
-          </figure>
-        </section>
+          </section>
+        </div>
       </n-spin>
     </n-card>
   </div>
@@ -167,6 +174,7 @@ import MarkdownRenderer from '../../components/common/MarkdownRenderer.vue'
 import EmptyState from '../../components/common/EmptyState.vue'
 import { getExperiments, getExperimentDetail, getExperimentAssetUrl } from '../../api/experiments'
 import { vClickable } from '../../directives/clickable'
+import { splitReportAppendix, narrativeEmbedsAsset } from './experimentReportContent'
 
 use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent])
 
@@ -235,10 +243,15 @@ function open(r) {
   router.push(detailHref(r))
 }
 
-const metricTables = computed(() => detail.value?.metrics?.tables || [])
+const metricTables = computed(() => (detail.value?.metrics?.tables || []).filter(t => (t.rows || []).length))
 const hasSeries = computed(() => (detail.value?.metrics?.series || []).some(s => (s.points || []).length))
 const manifestMetrics = computed(() => detail.value?.manifest?.metrics || [])
+const evidenceEntries = computed(() => Object.entries(detail.value?.manifest?.evidence || {}).filter(([, v]) => v))
 const cases = computed(() => (detail.value?.manifest?.cases || []).filter(c => c.kind === 'image' && c.src))
+const reportParts = computed(() => splitReportAppendix(detail.value?.content || ''))
+const hasStructuredMetrics = computed(() => !!(manifestMetrics.value.length || hasSeries.value || metricTables.value.length || evidenceEntries.value.length))
+// 正文已引用的案例图不重复铺满，只补未引用的
+const additionalCases = computed(() => cases.value.filter(c => !narrativeEmbedsAsset(reportParts.value.narrative, c.src)))
 const compareMode = ref('side')
 const toggleIndex = ref(0)
 
@@ -365,15 +378,40 @@ watch(() => route.query, (q) => {
 .problems-alert { margin-top: 10px; }
 .problem-list { margin: 6px 0 0; padding-left: 18px; }
 
-.detail-body { margin-top: 8px; }
+.detail-article { margin-top: 8px; max-width: 76ch; }
+.foldable {
+  margin-top: 18px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  background: var(--color-elevated);
 
-.metrics-section, .chart-section, .manifest-metrics, .cases-section {
+  summary {
+    cursor: pointer;
+    padding: 10px 14px;
+    font-weight: 600;
+    list-style: none;
+    &::-webkit-details-marker { display: none; }
+    &::before { content: "▸"; margin-right: 8px; color: var(--color-text-dim); }
+  }
+  &[open] summary::before { content: "▾"; }
+  summary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; border-radius: 8px; }
+
+  .fold-hint { display: block; font-size: 12px; font-weight: normal; color: var(--color-text-dim); margin-top: 2px; }
+  @media (min-width: 640px) { .fold-hint { display: inline; margin-left: 10px; margin-top: 0; } }
+
+  > .markdown-body { padding: 0 14px 14px; }
+  > section { padding: 0 14px 14px; }
+}
+
+.metrics-section, .chart-section, .manifest-metrics { margin-top: 12px; padding-top: 0; border-top: none;
+  h3 { font-size: 13px; margin: 0 0 6px; color: var(--color-text-secondary); }
+}
+
+.cases-section {
   margin-top: 20px;
   padding-top: 12px;
   border-top: 1px solid var(--color-border-light);
-
   h2 { font-size: 15px; margin: 0 0 10px; }
-  h3 { font-size: 13px; margin: 10px 0 6px; color: var(--color-text-secondary); }
 }
 
 .metric-table { margin-bottom: 12px; }

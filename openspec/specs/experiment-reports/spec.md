@@ -17,7 +17,7 @@ TBD - created by archiving change add-experiment-report. Update Purpose after ar
 
 ### Requirement: frontmatter 与章节完整性
 
-`report.md` 的 frontmatter SHALL 提供 `title`、`date`、`run_id`、`status`、`verdict`、`summary`、`source`（`change` 为可选引用）；`status` SHALL 取 `complete|partial|failed`，`verdict` SHALL 取 `improved|no-gain|worse|inconclusive`。正文 SHALL 含八个规定章节：结论摘要、实验问题与假设、实验设置与环境、指标结果、案例展示、失败案例与限制、结论与建议、产物来源；不适用的章节 SHALL 说明原因而非省略。
+`report.md` 的 frontmatter SHALL 提供 `title`、`date`、`run_id`、`status`、`verdict`、`summary`、`source`（`change` 为可选引用）；`status` SHALL 取 `complete|partial|failed`，`verdict` SHALL 取 `improved|no-gain|worse|inconclusive`。正文 SHALL 采用读者导向文章模板（背景与目标、当前问题、实验设计、结果与分析、结论与下一步、附录：配置与完整数据）；存量报告若用旧八章机器校验式模板（结论摘要、实验问题与假设、…、产物来源），后端与生成脚本 SHALL 接受并标记 legacy 仍完整校验、不清空。不适用的章节 SHALL 说明原因而非省略。
 
 #### Scenario: 枚举校验
 - **WHEN** frontmatter 的 `status` 或 `verdict` 取枚举外值

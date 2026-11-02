@@ -22,6 +22,8 @@ ProjFlow 的评测模块（`evaluation/`）能跑评测、存结果（`evaluatio
 | 环境段 11 字段强制校验（commit/torch/gpu_driver…） | 无 GPU/远程实验；环境段保留但按评测模块实际字段（模型/数据集/配置版本、时间戳） |
 | 报告 frontmatter 的 `change` 字段强绑定 openspec change | ProjFlow 评测多为轻量对比；`change` 保留为可选引用字段 |
 
+参照 CyberVerse `124a697 feat(report): present experiment reports as reader-oriented articles`：报告正文采用「读者导向文章模板」（背景与目标 → 当前问题 → 实验设计 → 结果与分析 → 结论与下一步 → 附录：配置与完整数据，附录默认折叠），替代原八章机器校验式模板。叙述字段 `background/problem/design/analysis/conclusion`（+ 可选 `limitations/summary`）；后端与生成脚本均接受**新模板或旧模板**（旧报告不清空）。本文五章为缺省，旧八章标记 legacy 仍校验。
+
 ## Capabilities
 
 ### New Capabilities
