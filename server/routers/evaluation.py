@@ -89,7 +89,7 @@ async def run_evaluation(data: dict = Body(...)):
         'config': data,
         'output_video': None,
         'metrics': None,
-        'note': '上游脚手架为模拟响应；下游库（如 infraredComp）实接评测脚本后填充 output_video/metrics。',
+        'note': '上游脚手架为模拟响应；下游库实接评测脚本后填充 output_video/metrics。',
     }
 
 

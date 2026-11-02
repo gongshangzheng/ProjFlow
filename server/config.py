@@ -9,11 +9,11 @@ PAPERS_DIR = os.path.join(BASE_DIR, "papers")
 EVALUATION_DIR = os.path.join(BASE_DIR, "evaluation")
 
 # 评测输出目录（压缩码流 / 重建视频等，供 /api/evaluation/outputs 端点按需服务）
-# 下游库可覆盖：infraredComp 用 results/video/，其它库用 evaluation/outputs/
+# 下游库可覆盖此路径（例：results/video/），默认 evaluation/outputs/
 OUTPUTS_DIR = os.path.join(EVALUATION_DIR, "outputs")
 
 # 训练模块路径（镜像 results/video/ 结构）
-# 下游库可覆盖：infraredComp 用 results/training/，其它库用 training/outputs/
+# 下游库可覆盖此路径（例：results/training/），默认 training/outputs/
 TRAINING_DIR = os.path.join(BASE_DIR, "results", "training")
 TRAINING_METRICS_JSON = os.path.join(TRAINING_DIR, "metrics.json")  # 训练 run 列表(含 loss_series)
 CHECKPOINTS_DIR = os.path.join(TRAINING_DIR, "checkpoints")         # trained .pth state_dicts

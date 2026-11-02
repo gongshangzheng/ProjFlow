@@ -6,7 +6,6 @@ value. ``--status`` is the kanban "move between buckets" lever (status drives
 which bucket a task appears in — completed/active/planned/paused/blocked).
 
 Self-locating: run from anywhere; resolves the repo root from its own path.
-Mirrors the same file in ~/infraredComp (identical tasks.json schema).
 
 Usage:
     # change status / assignee

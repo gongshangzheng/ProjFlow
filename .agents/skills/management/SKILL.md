@@ -11,7 +11,7 @@ description: |
 
 本 skill 提供项目管理模块（`management/`）的完整操作指南，以及一套**自定位**的 CRUD 脚本，直接读写 `management/` 下的数据文件。
 
-> **架构前提**：后端 `server/routers/management.py` 是**只读**的（解析数据文件暴露给前端）。所有"增删改"由本 skill 的脚本直接修改文件完成，再由只读 API 暴露。infraredComp 镜像本库。
+> **架构前提**：后端 `server/routers/management.py` 是**只读**的（解析数据文件暴露给前端）。所有"增删改"由本 skill 的脚本直接修改文件完成，再由只读 API 暴露。
 
 > **任务数据单源**：任务（看板 + 项目树）的唯一来源是 **per-project `management/projects/{slug}/tasks.json`**（层级树）。看板（TaskBoard）是它的**派生视图**——按 status 展平成 3 桶，按项目切换。`tasks.md` 已废弃删除。成员/报表/会议/里程碑仍是 markdown。
 
@@ -61,7 +61,7 @@ management/
 
 侧边栏"项目管理"子菜单：团队成员 → 报告 → 任务看板 → 里程碑 → 会议纪要 → 文档。
 
-> **训练体系**（`/training/*`）是上游脚手架——`server/routers/training.py` 提供通用 API 契约（空数据），`web/src/views/training/` 有 5 个视图组件。下游库（如 infraredComp）覆盖此路由接领域模型。management skill 不涉及训练模块的 CRUD。
+> **训练体系**（`/training/*`）是上游脚手架——`server/routers/training.py` 提供通用 API 契约（空数据），`web/src/views/training/` 有 5 个视图组件。下游库（如 pet-action-recognition）覆盖此路由接领域模型。management skill 不涉及训练模块的 CRUD。
 
 ---
 

@@ -6,7 +6,6 @@ the project-tree page). New node is appended to the root list, or to a
 parent's `children` when --parent is given. id auto-generated (tN / parent-N).
 
 Self-locating: run from anywhere; resolves the repo root from its own path.
-Mirrors the same file in ~/infraredComp (identical tasks.json schema).
 
 Usage:
     # root task

@@ -1,6 +1,6 @@
 """训练体系路由 — 上游脚手架（镜像 evaluation.py 契约）。
 
-下游库（如 infraredComp）覆盖此通用版：接领域模型（CompressAI/ELIC）、训练数据集、
+下游库（如 pet-action-recognition）覆盖此通用版：接领域模型、训练数据集、
 真实训练脚本（POST /run 触发）、metrics.json 读取。上游仅提供契约 + 默认空数据。
 
 数据目录（镜像 results/video/）：
@@ -196,7 +196,7 @@ async def run_training(data: dict = Body(...)):
         "config": data,
         "checkpoint": None,
         "metrics": None,
-        "note": "上游脚手架为模拟响应；下游库（如 infraredComp）实接训练脚本后填充 checkpoint/metrics。",
+        "note": "上游脚手架为模拟响应；下游库实接训练脚本后填充 checkpoint/metrics。",
     }
 
 

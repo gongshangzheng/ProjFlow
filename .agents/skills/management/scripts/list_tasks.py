@@ -5,7 +5,6 @@ Single source of truth is the per-project tasks.json (hierarchical tree, shared
 with the project-tree page). The kanban board is a derived flatten-view.
 
 Self-locating: run from anywhere; resolves the repo root from its own path.
-Mirrors the same file in ~/infraredComp (identical tasks.json schema).
 
 Usage:
     python3 list_tasks.py --slug myproject                 # tree view

@@ -1,7 +1,7 @@
 ---
 name: upstream-sync
 description: |
-  上游/下游拓扑与责任分工指南。说明上游=共享脚手架 owner、infraredComp/pet-action-recognition/DigitalTeacher=下游（嫁接上游 root 为公共祖先），以及如何把共享改进从上游传播到下游。
+  上游/下游拓扑与责任分工指南。上游=共享脚手架 owner，下游=pet-action-recognition（嫁接上游 root 为公共祖先），以及如何把共享改进从上游传播到下游。
   触发场景：(1) 在上游改了共享脚手架想同步到下游 (2) 下游想 fetch 上游改进 (3) 判断某个改动该落在上游还是下游 (4) 理解四库的 git 历史关系 (5) 从上游初始化一个新库
 ---
 
@@ -15,17 +15,16 @@ description: |
         上游 (upstream)
         root 159e4aa「项目管理demo平台初始化」
               │  (嫁接为公共祖先)
-   ┌──────────┼──────────┐
-   ▼          ▼          ▼
-infraredComp  pet-action  DigitalTeacher   (downstream, 下游)
+              ▼
+   pet-action-recognition   (downstream, 下游)
 ```
 
 - **上游**（branch `main`）：共享全栈脚手架的唯一 owner。
-- **下游 = infraredComp / pet-action-recognition / DigitalTeacher**：各自 `git remote add upstream <上游URL>`，已嫁接上游 root 为历史公共祖先（`git merge-base HEAD upstream/main` = `159e4aa`）。
+- **下游 = pet-action-recognition**（历史下游 infraredComp / DigitalTeacher 已于 2026-10 退役删除，仅存于历史记录）：`git remote add upstream <上游URL>`，已嫁接上游 root 为历史公共祖先（`git merge-base HEAD upstream/main` = `159e4aa`）。
 
 > **初始化新库**：从上游拉出新库后，**在新库内执行 openspec change `fork-init-guide`**（tasks 即完整适配清单：端口 / OpenSpec 目录 / 命名 / 领域数据 / 依赖坑 / `HIDDEN_KEYS` 功能隐藏），完成后 `openspec archive fork-init-guide`。
 
-> 嫁接后四库提交日期非单调（上游 2026-07-10 是 infraredComp 2026-06-23 的祖先），属正常——git 允许，不影响功能。所有下游 commit SHA 已重写（force-push），旧 SHA 失效。
+> 嫁接后各库提交日期非单调，属正常——git 允许，不影响功能。下游 commit SHA 已重写（force-push），旧 SHA 失效。
 
 ## 责任分工（决定一个改动该落在哪）
 
@@ -33,9 +32,7 @@ infraredComp  pet-action  DigitalTeacher   (downstream, 下游)
 |------|------|----------|
 | 共享全栈脚手架 | **上游** | `server/main.py`(app+CORS+router 挂载)、`server/config.py`(路径常量模式)、`server/utils/file_utils.py`、`server/parsers/markdown_table.py`(含空表修复)、`server/parsers/tasks_parser.py`(看板=项目树同源派生)、parser 模式、`web/` 脚手架(vite.config/api/request.js/layouts/MainLayout.vue/router/index.js/styles/)、`start_services.sh`、`AGENTS.md` 结构、management/papers/evaluation **模块结构**、`.github/workflows` |
 | 共享 skills | **上游** | 跨项目复用的 skill（management CRUD、web 开发指南、本 upstream-sync 等）；下游镜像成自己前缀版本时从上游取改进 |
-| 红外压缩领域 | **infraredComp（下游）** | `benchmark/video/` 轮廓视频压缩评测、`datasets/`、`results/`、`server/routers/benchmark.py`、`web/src/views/benchmark/`、contour-video-* skills |
 | 宠物动作识别领域 | **pet-action-recognition（下游）** | `evaluation/`、宠物专属 router/views、pet-action-recognition-* skills |
-| 数字私教领域 | **DigitalTeacher（下游）** | `evaluation/`、`ppt/`、`research/`、数字私教专属 router/views、digital-teacher-* skills |
 | 领域数据 | **各下游自管，永不进上游** | `management/`(team/daily/...)、`papers/` 数据、`data/*.db`、`datasets/` |
 
 **铁律**：
@@ -120,8 +117,8 @@ git commit --amend -m "[shared] <原信息>（pick 自 pet <SHA>）"  # 标注�
 
 ## 经验沉淀（架构决策，供后人参考）
 
-- **任务数据单源（2026-07-15）**：任务看板与项目树曾用两份冗余文件——`management/docs/tasks.md`（全局看板，3 段 markdown 表）+ `management/docs/projects/{slug}/tasks.json`（项目树，层级 JSON），schema 各异、手动双写易分叉。已合并为**单源 = per-project `tasks.json`**：看板（`server/parsers/tasks_parser.parse_tasks(slug)`）递归展平树 + 按 status 映射成 3 桶（completed→completed / active→in_progress / planned·paused·blocked→pending）；`tasks.md` 删除。改一处、看板与项目树同步。脚手架改动按铁律先在上游落地 `[shared]` commit，再同构同步到 infraredComp。管理 skill 脚本（`add/update/delete/list_task.py`）改操作 `tasks.json`（`--slug --id`），成员/报表/会议/里程碑仍是 markdown（`mgmt_io` markdown helpers 保留）。
-- **训练界面上游/下游边界**：上游训练 UI 是上游契约（`/run` 是 stub，models/datasets 空，待下游覆盖）。infraredComp 的训练 UX（localStorage F5 持久化、config preset 回填、3s 实时轮询曲线、auto-select-latest、withSelected 下拉稳定）已回移植到上游作为通用范本，**丢弃红外特异设计**（method canny/sobel/hed、isVideo 条件字段、imagenet 提示、λ/quality 率失真字段）。下游 infraredComp **保留** λ/quality/method 等领域字段（RD 训练脚本 `scripts/train_model.py` 需要 `--quality`/`--lambda`）。判断标准：上游表单只放通用超参（epochs/lr/batch/optimizer/device/extra_args），领域超参由下游加。
+- **任务数据单源（2026-07-15）**：任务看板与项目树曾用两份冗余文件——`management/docs/tasks.md`（全局看板，3 段 markdown 表）+ `management/docs/projects/{slug}/tasks.json`（项目树，层级 JSON），schema 各异、手动双写易分叉。已合并为**单源 = per-project `tasks.json`**：看板（`server/parsers/tasks_parser.parse_tasks(slug)`）递归展平树 + 按 status 映射成 3 桶（completed→completed / active→in_progress / planned·paused·blocked→pending）；`tasks.md` 删除。改一处、看板与项目树同步。脚手架改动按铁律先在上游落地 `[shared]` commit，再同步到下游。管理 skill 脚本（`add/update/delete/list_task.py`）改操作 `tasks.json`（`--slug --id`），成员/报表/会议/里程碑仍是 markdown（`mgmt_io` markdown helpers 保留）。
+- **训练界面上游/下游边界**：上游训练 UI 是上游契约（`/run` 是 stub，models/datasets 空，待下游覆盖）。（历史注：infraredComp 的训练 UX——localStorage F5 持久化、config preset 回填、3s 实时轮询曲线、auto-select-latest、withSelected 下拉稳定——已回移植到上游作为通用范本，当时丢弃了红外特异设计；该库已退役。）判断标准：上游表单只放通用超参（epochs/lr/batch/optimizer/device/extra_args），领域超参由下游加。
 
 ## 备份与历史
 

@@ -2,7 +2,7 @@
 
 ## Why
 
-ProjFlow（上游）已被多个库当脚手架初始化（infraredComp / pet-action-recognition / DigitalTeacher / ai-api-research），且踩过真实坑：ai-api-research 未替换端口与本库 3210/8809 冲突、`package-lock.json` 内网 registry 导致 `npm install` 反复回滚、本库是 OpenSpec 库而新库若不清理会继承 ProjFlow 的 context 与 changes 历史。这些适配点散落在 AGENTS.md（仅端口）与 upstream-sync SKILL.md（仅拓扑），新库初始化后靠人记必然遗漏。**本 change 本身就是适配指南**：它常驻上游、在上游永不执行；新库从本库初始化后的第一个动作，就是执行这个 change，把全部适配工作走完。
+ProjFlow（上游）已被多个库当脚手架初始化（pet-action-recognition / ai-api-research；历史下游 infraredComp / DigitalTeacher 已退役），且踩过真实坑：ai-api-research 未替换端口与本库 3210/8809 冲突、`package-lock.json` 内网 registry 导致 `npm install` 反复回滚、本库是 OpenSpec 库而新库若不清理会继承 ProjFlow 的 context 与 changes 历史。这些适配点散落在 AGENTS.md（仅端口）与 upstream-sync SKILL.md（仅拓扑），新库初始化后靠人记必然遗漏。**本 change 本身就是适配指南**：它常驻上游、在上游永不执行；新库从本库初始化后的第一个动作，就是执行这个 change，把全部适配工作走完。
 
 ## What Changes
 
