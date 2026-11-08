@@ -130,8 +130,13 @@ GPU 型号/驱动/时钟/功耗、可用显存与 load、seed 与输入 hash。
 |---|---|
 | 一次运行的全部产物 | `<repo>/results/<topic>/<run-id>/`（确认该目录已 gitignore） |
 | 大资产（权重/参考素材） | `<repo>/results/<topic>-assets/`（只读复用，不进 run 目录） |
-| 可复用脚本 | `scripts/` 或各 skill 的 `scripts/`（**必须提交**） |
-| 一次性探针 | `tmp/`（可不提交，但结论必须转写进 evidence） |
+| 可复用脚本 | 根目录 `scripts/` 或各 skill 的 `scripts/`（**必须提交**） |
+| 一次性探针脚本 | 根目录 `scripts/tmp/`（gitignored；可不提交，但结论必须转写进 evidence） |
+| 一次性运行产物 | `tmp/`（gitignored；保留时应关联具体 run/evidence） |
+
+创建探针脚本前，先确认 `git check-ignore -v scripts/tmp/<file>` 命中忽略规则，并确认 `git ls-files scripts/tmp` 没有已跟踪文件；不满足时停下处理，不把脚本临时放在其他受跟踪目录。实验结束后检查脚本及相关调用上下文中的凭据、令牌、私有端点和用户路径。只有确认内容适合入库、且有历史参考价值并检查完引用时，才移至 `scripts/archive/`；发现敏感内容或无法确定是否安全时，不自动归档，先向用户报告。临时运行产物留在 `tmp/`，不随脚本一起移入归档。
+
+若多个临时脚本呈现重复的长期需求，先向用户列出候选通用能力和取舍，获准后再固化到根目录 `scripts/<area>/`。
 
 `<run-id>` = `<小写短描述>-<YYYYMMDD><轮次字母>`（例 `native-scan-20261028a`）；禁止 `test2`/`final`/`new`。
 

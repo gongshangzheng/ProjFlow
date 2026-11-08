@@ -213,7 +213,7 @@ $$
 
 ### 1.6 文档顺序工具（`order`）
 
-`./scripts/docs_order.py` 是随本 skill 提供的 `order` 维护工具，**只用 Python 标准库**，仅写文档时手工调用（服务运行不依赖它）：
+`.agents/skills/documentation/scripts/docs_order.py` 是随本 skill 提供的 `order` 维护工具，**只用 Python 标准库**，仅写文档时手工调用（服务运行不依赖它）：
 
 ```bash
 # 只读：列出当前阅读顺序、整数空位与重复值

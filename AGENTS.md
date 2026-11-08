@@ -139,10 +139,14 @@ ProjFlow/
 │   ├── configs/             # 评测配置 JSON
 │   ├── scripts/             # 评测脚本
 │   └── results/             # 评测结果 JSON（.gitignore）
-├── data/                    # 数据目录
-│   └── papers.db            # SQLite 论文数据库（.gitignore）
-└── scripts/                 # 工具脚本
-    └── import_papers.py     # 论文导入脚本
+├── data/                    # 通用应用数据，例如论文 SQLite 数据库（.gitignore）
+├── datasets/                # 数据集资产，例如 demo/images 样本
+├── results/                 # 训练、评测等运行生成的结果
+├── lib/                     # 有跨流程复用需要时放置实现代码
+└── scripts/                 # 长期维护的项目工具入口
+    ├── import_papers.py     # 从 data/extracted_papers.json 导入论文
+    ├── tmp/                 # 本地临时脚本，Git 忽略
+    └── archive/             # 仅供历史参考的归档脚本
 ```
 
 > 说明性文档（含 wiki）统一置于 `management/docs/`；仓库根目录不设 `docs/`。
@@ -176,7 +180,7 @@ data/papers.db（SQLite 数据库）
 
 **关键设计**：
 - **论文存储**：SQLite 数据库 `data/papers.db`，表结构含标题、作者、摘要、来源、分类等
-- **数据导入**：`scripts/import_papers.py` 脚本从 JSON 导入论文数据
+- **数据导入**：长期论文导入入口为 `scripts/import_papers.py`，输入文件默认是 `data/extracted_papers.json`。这与 `.agents/skills/papers/scripts/import_papers.py` 的按路径导入工具用途不同。
 - **API 端点**：论文列表（分页/筛选）、详情、统计摘要、数据源配置
 
 ### 3. 评测体系模块
@@ -203,6 +207,20 @@ evaluation/ 目录（JSON 文件）
 | 周报 | `weekly/YYYY/WXX-姓名.md` | `weekly/2026/W28-张三.md` |
 | 月报 | `monthly/YYYY/MM-姓名.md` | `monthly/2026/07-张三.md` |
 | 会议 | `docs/meetings/YYYY-MM-DD.md` | `docs/meetings/2026-07-09.md` |
+
+### 脚本与库目录约定
+
+- 根目录 `scripts/` 存放长期维护、可由开发者直接运行的项目级工具。稳定的重复能力按用途放在具体子目录，运行方式由该目录的 README 说明。
+- 临时脚本放在 `scripts/tmp/`。使用前确认当前仓库的忽略规则实际匹配（`git check-ignore -v scripts/tmp/<file>`），并确认 `git ls-files scripts/tmp` 没有已跟踪文件；任一检查不通过时先停下处理，不在该目录创建临时脚本。
+- 临时脚本使用后，先检查脚本内容及相关调用上下文中的凭据、令牌、私有端点、用户路径等敏感信息。只有确认适合入库且有历史参考价值时，才检查代码和文档引用并移至 `scripts/archive/`，同时说明保留理由。发现敏感内容或无法判定时，不得自动归档进 Git，先向用户报告并确认处理方式。
+- 已确认无用但有历史参考价值的脚本也归档，不凭猜测删除。一次性且无保留价值的内容仅在用途和归属明确、且任务授权清理时删除。不要把 `tmp/` 中已有脚本或数据未经确认就整体移动。
+- `scripts/archive/` 保存不属于常规支持流程、但确认适合入库且有保留价值的历史脚本；归档不等于认定脚本无用。
+- `.agents/skills/<skill>/scripts/` 存放只服务于对应 skill 工作流的工具；`web/scripts/` 存放前端构建钩子；模块内的 `evaluation/scripts/` 等目录属于模块自身。不要仅因文件类型相同就把这些脚本搬到根目录。
+- `lib/` 用于具体项目流程所需的可导入实现代码，不放命令入口或临时脚本。实现只被单一模块使用时，优先放在该模块内部；只有存在跨流程复用需求时，才使用根目录 `lib/`。
+- `data/` 存放通用应用数据。本仓库的论文 SQLite 数据库位于 `data/papers.db`。
+- `datasets/` 存放数据集资产；仓库当前包含 `datasets/demo/images/` 样本。模块目录如 `evaluation/datasets/` 可以只存定义 JSON，不应假定它包含原始数据。
+- `results/` 存放训练、评测等运行产物；大体积或运行期文件按各模块的忽略规则处理。
+- 需要多个临时脚本解决相近且重复的问题时，先列出候选能力、输入输出、替代方案和维护成本，再请用户选择是否固化。未获选择前，不新增长期通用工具。
 
 ## 开发规范
 
@@ -265,7 +283,7 @@ macOS 上 nohup 进程需要 `</dev/null` 重定向 stdin，否则终端关闭�
 检查后端（port 8809）是否在运行，`management/` 目录下是否有对应的数据文件。
 
 ### 论文页面数据为空
-论文数据库 `data/papers.db` 需通过 `scripts/import_papers.py` 导入数据后才有内容。
+论文数据库位于 `data/papers.db`。根目录的 `scripts/import_papers.py` 会读取 `data/extracted_papers.json`，并清空现有论文表后导入，因此运行前须确认输入文件和数据库内容可替换。按任意 JSON 文件导入请使用 `.agents/skills/papers/scripts/import_papers.py <json-path>`。
 
 ### 评测页面数据为空
 在 `evaluation/models/`、`evaluation/datasets/` 等目录下放置 JSON 文件即可显示数据。

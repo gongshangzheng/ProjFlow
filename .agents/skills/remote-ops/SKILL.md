@@ -16,7 +16,7 @@ description: |
 
 ## 1. 配置（每个下游仓库自己填，不写在本 skill 里）
 
-脚本从两个环境变量/默认值取配置，见 `scripts/_remote_common.sh`：
+脚本从两个环境变量/默认值取配置，见 `.agents/skills/remote-ops/scripts/_remote_common.sh`：
 
 | 变量 | 含义 | 默认 |
 |---|---|---|
@@ -26,7 +26,7 @@ description: |
 把默认值改成你仓库的实际值即可；**不要**在脚本里写死 IP、账号、口令。
 
 **代码只能经 git 流动**：本地 commit → `git push <alias> <branch>` → 远端校验 `git log -1`
-与 `git status`。禁止用 rsync/scp 覆盖远端 tracked 文件；一次性脚本放远端 `tmp/`（gitignored）。
+与 `git status`。禁止用 rsync/scp 覆盖远端 tracked 文件。仅在远端运行且不会回收的 disposable 脚本可放远端仓库 `scripts/tmp/`，运行产物放远端仓库 `tmp/`。在远端创建临时脚本前，先确认 `git check-ignore -v scripts/tmp/<file>` 命中规则，并确认 `git ls-files scripts/tmp` 无已跟踪文件；检查不通过时停止，不写入该目录。需要审查、复用或回收的脚本应先在本地 `scripts/tmp/` 编写，检查敏感内容后经 Git 流转；远端不得通过 rsync/scp 覆盖 tracked 文件。
 
 ## 2. 三道闸
 
@@ -39,14 +39,14 @@ bash $SD/preflight.sh --gpu-index 0 --json .run/preflight.json   # 顺带落盘�
 
 # ② 跑任何超过几秒的命令：包在守卫里（nice + 线程上限 + 看门狗）
 bash $SD/remote_run.sh --gpu-index 0 --max-cpu-pct 350 --max-rss-mb 24000 --timeout-s 3600 \
-  -- python3 scripts/<your_task>.py --flag
+  -- python3 scripts/tmp/<your_task>.py --flag
 
 # ③ 环境核验（跑之前）：远端跑的是不是评审过的那份代码 + 那个环境
 bash $SD/env_check.sh --env <name> --expect-commit <sha> --json results/<topic>/<run-id>/env.json
 
 # ④ 跑之前审代码：静态扫描 + 降规模冒烟（峰值 RSS 外推）
-python3 $SD/code_audit.py audit scripts/<your_task>.py
-python3 $SD/code_audit.py smoke --cap-mb 2000 -- python3 scripts/<your_task>.py --frames {n}
+python3 $SD/code_audit.py audit scripts/tmp/<your_task>.py
+python3 $SD/code_audit.py smoke --cap-mb 2000 -- python3 scripts/tmp/<your_task>.py --frames {n}
 ```
 
 ### 退出码表（照此处置，不许绕过）

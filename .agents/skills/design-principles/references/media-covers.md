@@ -29,7 +29,7 @@ if ok and frame is not None:
 - **幂等**：`if not os.path.isfile(cover_path)` skip-if-exists，重跑不重复提取
 - **cv2 惰性 import**：只在缓存 miss 时 import；未安装时优雅降级（404 + 前端图标 fallback），不能拖垮整个路由
 - 体积预算：缩略图 < 100KB/张，原图只在详情/预览层加载
-- 批量生成用本 skill 的 `scripts/extract_covers.py`
+- 批量生成由各项目按需提供；ProjFlow 当前未提供封面提取脚本。
 
 ## 2. 服务端点
 

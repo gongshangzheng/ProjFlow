@@ -18,7 +18,7 @@ description: |
 | 视频封面图/缩略图 | 视频卡片、结果画廊、媒体网格 | `references/media-covers.md` |
 | 数据集管理界面 | 数据集浏览、资产画廊、文件网格 | `references/dataset-page.md` |
 
-`scripts/extract_covers.py` — 批量提取视频封面（cv2 中间帧，`--src 视频目录 --out 封面目录`，幂等）。
+当前 ProjFlow 未提供批量视频封面提取脚本。
 
 ## 1. 列表/结果页必须分页
 
