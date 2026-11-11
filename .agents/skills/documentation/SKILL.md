@@ -4,6 +4,7 @@ description: |
   ProjFlow 文档的写作流程门禁与内容规范（本库唯一的文档写作 skill）。
   流程门禁：写任何文档正文之前，先判断是否结构级变更、开 OpenSpec change、在 design.md 写清结构与目标读者、经用户审核后才动笔。
   内容规范：结构模板、内部链接、图片与图题、LaTeX 公式、Mermaid 图表、写作风格、会议纪要格式。
+  图的**产出方式**（Mermaid 渲染成 PNG/SVG、手写矢量图、公式矢量化、排版坑位）不在本 skill，见 `report-figures`。
   触发场景：(1) 要写/新增一篇文档，(2) 文档大改或结构调整，(3) 不确定某次文档改动是否需要开 change，
            (4) 需要文档落点与登记规则，(5) 查文档模板与格式约定，(6) 处理 Mermaid / 内部链接 / 图片 / 公式 / 风格。
 ---
@@ -167,7 +168,7 @@ id: 1
 
 ### 1.4 图片与图题
 
-**存放**：`management/docs/_assets/<slug>/`（下划线前缀表明该目录非文档；文档列表只扫描 `*.md`，图片不会被当成文档）。`<slug>` 与所属文档 slug 对齐。
+**存放**：`management/docs/_assets/<slug>/`（下划线前缀表明该目录非文档；文档列表只扫描 `*.md`，图片不会被当成文档）。`<slug>` 与所属文档 slug 对齐。图片怎么产出（渲染、手写矢量、导出尺寸）见 `report-figures` skill；图的源码与图片同目录一起入库。
 
 **引用**（必须用绝对 URL）：
 
@@ -244,6 +245,8 @@ python3 .agents/skills/documentation/scripts/docs_order.py renumber management/d
 
 Mermaid 是文档中表达流程、时序、架构的首选方式。完整速查见 `.agents/skills/documentation/references/mermaid-cheatsheet.md`。
 
+> 图要**落成图片文件**（贴进报告、PPT、验收材料）时，用 `report-figures` skill 渲染：主题配置、2 倍超采样、甘特图泳道列与今天标记的处理都在那里。本 skill 只管「文档里怎么写」。
+
 常用场景：
 
 | 类型 | 关键字 | 用途 |
@@ -308,7 +311,7 @@ flowchart TD
 
 创建新 wiki 文档时，可参考：
 
-```markdown
+````markdown
 ---
 title: 文档标题
 author: 作者
@@ -348,7 +351,7 @@ flowchart TD
 
 - [[slug-a]]
 - [[slug-b|显示文本]]
-```
+````
 
 ## 参考文件
 
