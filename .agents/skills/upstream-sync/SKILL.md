@@ -1,37 +1,27 @@
 ---
 name: upstream-sync
 description: |
-  上游/下游拓扑与责任分工指南。上游=共享脚手架 owner，下游=pet-action-recognition（嫁接上游 root 为公共祖先），以及如何把共享改进从上游传播到下游。
-  触发场景：(1) 在上游改了共享脚手架想同步到下游 (2) 下游想 fetch 上游改进 (3) 判断某个改动该落在上游还是下游 (4) 理解四库的 git 历史关系 (5) 从上游初始化一个新库
+  ProjFlow 家族的上游／下游职责与同步指南。用于确认 Git 或脚手架关系、归属共享改进、把已验证的共享改动传播到适用下游。
 ---
 
 # 上游 / 下游拓扑与责任分工
 
-四个全栈库（FastAPI `server/` + Vue3 `web/` + management/papers/evaluation 三模块）从同一套模板各自 `git init`，现以**上游为公共祖先**统一历史。
+## 拓扑与同步依据
 
-## 拓扑
+- **ProjFlow** 维护共享脚手架；`pet-action-recognition` 与 `children-face` 和它共享 Git 祖先 `159e4aa`。pet 还有自身的历史；各库同步前都应核对实际 `upstream` 与 merge-base，不以历史示例替代现状。
+- **investement**、**digital-human** 和 **live2d-avatar** 的项目文档确认它们由 ProjFlow 脚手架派生，但它们有独立的 Git 根。不要假定它们配置了同一个 `upstream` 或者能直接合并。
+- **CyberVerse** 不属于这个家族。退役项目名称只保留在历史记录中，不作为同步目标。
 
-```
-        上游 (upstream)
-        root 159e4aa「项目管理demo平台初始化」
-              │  (嫁接为公共祖先)
-              ▼
-   pet-action-recognition   (downstream, 下游)
-```
+向下游传播共享改动时，只迁移适用职责和约定；保留各库的端口、路径、数据、技能定制与 Git 发布策略。若没有可用远端，维持本地改动，不替项目新建远端。
 
-- **上游**（branch `main`）：共享全栈脚手架的唯一 owner。
-- **下游 = pet-action-recognition**（历史下游 infraredComp / DigitalTeacher 已于 2026-10 退役删除，仅存于历史记录）：`git remote add upstream <上游URL>`，已嫁接上游 root 为历史公共祖先（`git merge-base HEAD upstream/main` = `159e4aa`）。
-
-> **初始化新库**：从上游拉出新库后，**在新库内执行 openspec change `fork-init-guide`**（tasks 即完整适配清单：端口 / OpenSpec 目录 / 命名 / 领域数据 / 依赖坑 / `HIDDEN_KEYS` 功能隐藏），完成后 `openspec archive fork-init-guide`。
-
-> 嫁接后各库提交日期非单调，属正常——git 允许，不影响功能。下游 commit SHA 已重写（force-push），旧 SHA 失效。
+> 初始化新库时，参考上游 `openspec/changes/fork-init-guide` 的适配清单；在目标仓核对当前变更位置、适用的审批和归档流程。
 
 ## 责任分工（决定一个改动该落在哪）
 
 | 范围 | 归属 | 典型路径 |
 |------|------|----------|
 | 共享全栈脚手架 | **上游** | `server/main.py`(app+CORS+router 挂载)、`server/config.py`(路径常量模式)、`server/utils/file_utils.py`、`server/parsers/markdown_table.py`(含空表修复)、`server/parsers/tasks_parser.py`(看板=项目树同源派生)、parser 模式、`web/` 脚手架(vite.config/api/request.js/layouts/MainLayout.vue/router/index.js/styles/)、`start_services.sh`、`AGENTS.md` 结构、management/papers/evaluation **模块结构**、`.github/workflows` |
-| 共享 skills | **上游** | 跨项目复用的 skill（management CRUD、web 开发指南、本 upstream-sync 等）；下游镜像成自己前缀版本时从上游取改进 |
+| 共享 skills | **上游** | ProjFlow 家族复用的项目 skill（项目管理、Web 实现、本 upstream-sync 等）；全局通用工具不在家族仓库复制维护 |
 | 宠物动作识别领域 | **pet-action-recognition（下游）** | `evaluation/`、宠物专属 router/views、pet-action-recognition-* skills |
 | 领域数据 | **各下游自管，永不进上游** | `management/`(team/daily/...)、`papers/` 数据、`data/*.db`、`datasets/` |
 
@@ -52,7 +42,7 @@ git cherry-pick <SHA>                   # 精准搬一个共享改进
 # 例: git cherry-pick abc1234
 ```
 
-> 慎用 `git merge upstream/main`：虽有共同祖先（159e4aa），但四库重叠文件已分叉，blanket merge 会大面积冲突。**cherry-pick 具体的 [shared] commit 更可控**。
+> 不要默认合并 `upstream/main`。共享祖先的下游也可能已大幅分叉；优先挑选具体的 `[shared]` 提交。只有脚手架关系、没有共同历史的库，应按目标基线移植并验证。
 
 ### 取上游的「部分文件」到下游（共享件，保留 git 血缘）
 
@@ -122,4 +112,4 @@ git commit --amend -m "[shared] <原信息>（pick 自 pet <SHA>）"  # 标注�
 
 ## 备份与历史
 
-嫁接操作前已为四库各做 bundle 备份（`~/backups/pregraft-<date>/`），可 `git clone <bundle> <dir>` 完整恢复旧历史。嫁接后下游 commit SHA 全变；如需回滚，从 bundle 恢复后 `git push --force` 回旧 SHA。
+历史嫁接操作前曾为当时参与的仓库做 bundle 备份（`~/backups/pregraft-<date>/`），可 `git clone <bundle> <dir>` 完整恢复旧历史。嫁接后的提交 SHA 与旧历史不同；恢复备份与改写远端历史是两回事，本指南不授权改写远端历史。

@@ -1,9 +1,11 @@
 ---
 name: article-note
-description: 论文精读与 Markdown wiki 笔记流水线：先抓素材和分析，再生成 OpenSpec 结构，经用户确认后写入 management/docs/notes/；支持按需委派独立分析与图片落盘。
+description: 论文精读与 Markdown wiki 笔记流水线：先抓素材和分析，再生成 OpenSpec 结构，经用户确认后写入 management/docs/notes/；支持按需委派独立分析与图片落盘。 仅用于项目 Wiki，不承担外部论文发现或通用提取。
 ---
 
 # article-note
+
+> **职责边界**：本 skill 负责项目 Wiki 精读笔记、素材工作区、证据与发布门禁，不用于外部论文发现或博客发布。外部发现用全局 `web-search`，独立的通用文档提取用 `doc-intake`；保留本工作流的素材目录和脚本接口。
 
 ## 适用场景
 
