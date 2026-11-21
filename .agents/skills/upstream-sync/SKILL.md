@@ -40,6 +40,10 @@ description: |
 2. **领域代码 / 领域数据永不进上游**——`benchmark/`、`evaluation/`、`datasets/`、`data/*.db`、`management/` 数据各库自管。
 3. 共享改进的 commit message 加 `[shared]` 前缀，便于识别与 cherry-pick。
 
+### 远程运行手册的下游采用规则
+
+有项目专用远程手册的库，用 `remote-runtime` 注册手册；通用容量守卫、进度与退出通知仍走全局 `remote-ops`。旧 `remote-ops/scripts/` 是项目自动化接口，保持原有路径和行为，不复制其他库的脚本。只有过期引用、没有项目运行入口的下游，改用实际可用的全局入口，不新增手册；未配置主机则停止。
+
 ## 传播工作流
 
 ### 下游同步上游的共享改进（推荐 cherry-pick，精准）

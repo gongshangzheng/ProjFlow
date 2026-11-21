@@ -47,7 +47,7 @@ worktree **只在用户明确要求时**建（不是 agent 的判断项）。共
 
 ### 0.3 资源：GPU/CPU 被占或紧张，不许开跑（强制）
 
-统一入口是本仓的远程交互 skill（如 `remote-ops`），**不要自己写检查**：
+统一入口是本仓的 `remote-runtime` skill，**不要自己写检查**：
 
 ```bash
 SD=.agents/skills/remote-ops/scripts
@@ -234,7 +234,7 @@ python3 .agents/skills/experiment/scripts/build_report.py --help   # 作者清�
 
 | 事项 | 去哪 |
 |---|---|
-| 怎么连/预检/守卫/代码审计/环境核验 | `remote-ops` |
+| 怎么连/预检/守卫/代码审计/环境核验 | `remote-runtime` |
 | 训练/测试/评测的具体命令与模块文件格式 | 各自的领域 skill（如 `evaluation`） |
 | 数据集与权重位置 | `datasets` |
 | 文档写作与约定 | `documentation` |
